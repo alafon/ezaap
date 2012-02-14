@@ -1,44 +1,78 @@
 <?php
 
+/**
+ * @property Buzz\Browser $buzz the buzz instance
+ */
 abstract class ezsfService
 {
     const CONFIG_FILE = 'sfservice.ini';
 
     private static $services = array();
 
-    public function __construct( $test )
+    protected $buzz;
+
+    protected $configuration;
+
+    public function __construct( $serviceName )
     {
+        $this->serviceName = $serviceName;
+
+        $ini = eZINI::instance( self::CONFIG_FILE );
+        $this->configuration = $ini->BlockValues["{$serviceName}Settings"];
+
+        $this->buzz = new Buzz\Browser();
     }
 
-    public function buildRequest()
+    public function __call( $method, $arguments )
     {
-        // à partir de la conf
-            // PROTOCOL
-            // SERVEUR
-            // PORT
-            // URI
+        $url = $this->buildURL( $this->configuration['Server'],
+                                $this->configuration['URI'][$method]
+                );
+
+        $this->populateRequest();
+
+        switch( $this->configuration['RequestTypes'][$method] )
+        {
+            case 'get':
+                $this->buzz->get( $url );
+                break;
+            case 'ajax':
+                // todo enrichissement du post pour l'ajax
+            case 'post':
+                $this->buzz->post( $url );
+                break;
+        }
+
+        $this->handleResponse();
     }
 
-    public function sendRequest()
+    /**
+     *
+     * Build the URL
+     *
+     * @todo Validates URL with regexp
+     *
+     * @param string $serveur
+     * @param string $uri
+     * @param integer $port
+     * @param string $protocol
+     *
+     * @return string
+     */
+    public function buildURL( $serveur, $uri, $port = 80, $protocol = 'http'  )
     {
-        // gestion du type de requete
-            // GET
-            // POST
-
-        // Génération des headers + gestion des demandes AJAX
-        // X-Requested-With: XMLHttpRequest
+        return "{$protocol}://{$serveur}:{$port}{$uri}";
     }
 
-    public function parseResponse()
-    {
-        // traitement des codes retour
+    /**
+     * Has to be reimpl in the service handler
+     */
+    abstract function populateRequest();
 
-        // contenu
-            // contenu html
-            // contenu json
-            // contenu xml
-            //
-    }
+    /**
+     * Has to be reimpl in the service handler
+     */
+    abstract function handleResponse();
 
     /**
      *
