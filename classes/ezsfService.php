@@ -8,10 +8,40 @@ abstract class ezsfService
     const CONFIG_FILE = 'sfservice.ini';
 
     private static $services = array();
+    private $configuration;
 
+    /**
+     *
+     * The Buzz browser
+     *
+     * @var Buzz\Browser
+     */
     protected $buzz;
 
-    protected $configuration;
+
+    /**
+     *
+     * The Buzz response instance
+     *
+     * @var Buzz\Message\Response
+     */
+    protected $response;
+
+    /**
+     *
+     * The buzz request instance (can be Request or FormRequest)
+     *
+     * @var Buzz\Message\Request
+     */
+    protected $request;
+
+    /**
+     *
+     * The name of the current method
+     *
+     * @var string
+     */
+    protected $currentMethod;
 
     public function __construct( $serviceName )
     {
@@ -23,26 +53,46 @@ abstract class ezsfService
         $this->buzz = new Buzz\Browser();
     }
 
+    /**
+     *
+     * Gère l'appel à un service/method
+     *
+     * @param string $method
+     * @param mixed $arguments
+     */
     public function __call( $method, $arguments )
     {
-        $url = $this->buildURL( $this->configuration['Server'],
-                                $this->configuration['URI'][$method]
-                );
+        $this->currentMethod = $method;
 
-        $this->populateRequest();
+        $uri = $this->configuration['URI'][$method];
+        $server = $this->configuration['Server'];
+
+        $this->response = new Buzz\Message\Response();
 
         switch( $this->configuration['RequestTypes'][$method] )
         {
             case 'get':
-                $this->buzz->get( $url );
+                $this->request = new Buzz\Message\Request();
                 break;
             case 'ajax':
                 // todo enrichissement du post pour l'ajax
             case 'post':
-                $this->buzz->post( $url );
+                $this->request = new Buzz\Message\FormRequest();
                 break;
         }
 
+        // déclenche les actions spécifiques à ce service / methode
+        // en termes de construction de la requete
+        $this->populateRequest();
+
+        $this->request->setHost( $server );
+        $this->request->setResource( $uri );
+
+        $client = new Buzz\Client\Curl();
+        $client->send( $this->request, $this->response );
+
+        // déclenche les actions spécifiques à ce service / methode
+        // en termes de gestion de la réponse
         $this->handleResponse();
     }
 
@@ -64,15 +114,61 @@ abstract class ezsfService
         return "{$protocol}://{$serveur}:{$port}{$uri}";
     }
 
-    /**
-     * Has to be reimpl in the service handler
-     */
-    abstract function populateRequest();
+
+    private function populateRequest()
+    {
+        $methodNameSuffix = ucfirst( $this->currentMethod ) . "Request";
+        $preMethodName = "pre{$methodNameSuffix}";
+        $postMethodName = "post{$methodNameSuffix}";
+
+        // pre 'request' trigger
+        if( method_exists( $this, $preMethodName ) )
+        {
+            $this->$preMethodName();
+        }
+
+        // post 'request' trigger
+        if( method_exists( $this, $postMethodName ) )
+        {
+            $this->$postMethodName();
+        }
+    }
+
+    private function handleResponse()
+    {
+        $methodNameSuffix = ucfirst( $this->currentMethod ) . "Response";
+        $preMethodName = "pre{$methodNameSuffix}";
+        $postMethodName = "post{$methodNameSuffix}";
+
+        // 'pre' response trigger
+        if( method_exists( $this, $preMethodName ) )
+        {
+            $this->$preMethodName();
+        }
+
+        /* @var $response Buzz\Message\Response */
+        $response = $this->response;
+
+        $returnCode = $response->getStatusCode();
+        $this->responseContent = $response->getContent();
+
+        // 'post' response trigger
+        if( method_exists( $this, $postMethodName ) )
+        {
+            $this->$postMethodName();
+        }
+    }
 
     /**
-     * Has to be reimpl in the service handler
+     *
+     * Get the response retrieved by buzz
+     *
+     * @return type
      */
-    abstract function handleResponse();
+    public function getResponseContent()
+    {
+        return $this->responseContent;
+    }
 
     /**
      *
