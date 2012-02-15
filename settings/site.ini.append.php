@@ -8,6 +8,14 @@ AnonymousAccessList[]=sf/service
 # Only for development
 PolicyOmitList[]=sf/service
 
+[UserSettings]
+ExtensionDirectory[]=sfconnect
+
+LoginHandler[]
+LoginHandler[]=sfConnect
+LoginHandler[]=standard
+
+
 [DebugSettings]
 DebugOutput=enabled
 
