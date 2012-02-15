@@ -1,7 +1,9 @@
 <?php
 
 /**
- * @property Buzz\Browser $buzz the buzz instance
+ *
+ * @todo Gérer les timeouts
+ *
  */
 abstract class ezsfService
 {
@@ -57,6 +59,9 @@ abstract class ezsfService
         $this->configuration = $ini->BlockValues["{$serviceName}Settings"];
 
         $this->client = new Buzz\Client\Curl();
+
+        // debug since backend is so slow
+        $this->client->setTimeout( 10 );
     }
 
     abstract public function availableMethods();
