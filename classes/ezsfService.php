@@ -9,7 +9,6 @@ abstract class ezsfService
 {
     const CONFIG_FILE = 'ezsfservice.ini';
 
-    private static $services = array();
     protected $configuration;
 
     private $serviceName;
@@ -214,17 +213,9 @@ abstract class ezsfService
      */
     public static function get( $serviceName, $useCurrentToken = false )
     {
-        // Lazy loading
-        if( isset( self::$services[$serviceName] ) )
-        {
-            return self::$services[$serviceName];
-        }
-        else
-        {
-            $service = self::loadService( $serviceName );
-            self::$services[$serviceName] = $service;
-            return $service;
-        }
+        // @todo lazy loading with static stuff
+        return self::loadService( $serviceName, $useCurrentToken );
+
     }
 
     /**
