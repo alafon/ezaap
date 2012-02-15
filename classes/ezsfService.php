@@ -5,19 +5,12 @@
  */
 abstract class ezsfService
 {
-    const CONFIG_FILE = 'sfservice.ini';
+    const CONFIG_FILE = 'ezsfservice.ini';
 
     private static $services = array();
-    private $configuration;
+    protected $configuration;
 
-    /**
-     *
-     * The Buzz browser
-     *
-     * @var Buzz\Browser
-     */
-    protected $buzz;
-
+    private $serviceName;
 
     /**
      *
@@ -27,6 +20,8 @@ abstract class ezsfService
      */
     protected $response;
 
+    protected $responseCode;
+
     /**
      *
      * The buzz request instance (can be Request or FormRequest)
@@ -34,6 +29,17 @@ abstract class ezsfService
      * @var Buzz\Message\Request
      */
     protected $request;
+
+    /**
+     *
+     * Arguments to be used by the triggers
+     *
+     * @var array
+     */
+    protected $requestArguments;
+
+
+    protected $responseContent;
 
     /**
      *
@@ -50,8 +56,16 @@ abstract class ezsfService
         $ini = eZINI::instance( self::CONFIG_FILE );
         $this->configuration = $ini->BlockValues["{$serviceName}Settings"];
 
-        $this->buzz = new Buzz\Browser();
+        $this->client = new Buzz\Client\Curl();
     }
+
+    abstract public function availableMethods();
+
+    /**
+     * A reimpl pour indiquer si le service symfony peut etre appelé par le
+     * proxy eZ Publish /sf/service/<servicename>/<method>
+     */
+    abstract public function availableThroughServiceModule();
 
     /**
      *
@@ -60,60 +74,55 @@ abstract class ezsfService
      * @param string $method
      * @param mixed $arguments
      */
-    public function __call( $method, $arguments )
+    public function __call( $method, $arguments = array() )
     {
-        $this->currentMethod = $method;
+        $this->requestArguments = $arguments[0];
 
-        $uri = $this->configuration['URI'][$method];
-        $server = $this->configuration['Server'];
-
-        $this->response = new Buzz\Message\Response();
-
-        switch( $this->configuration['RequestTypes'][$method] )
+        try
         {
-            case 'get':
-                $this->request = new Buzz\Message\Request();
-                break;
-            case 'ajax':
-                // todo enrichissement du post pour l'ajax
-            case 'post':
-                $this->request = new Buzz\Message\FormRequest();
-                break;
+            if( array_search( $method, $this->availableMethods()) === false )
+            {
+                // @todo page d'erreur eZ si debug désactivé
+                throw new Exception( "Method {$method} non existante dans " . get_called_class() );
+            }
+            $this->currentMethod = $method;
+
+            $uri = $this->configuration['URI'][$method];
+            $server = $this->configuration['Server'];
+
+            $this->response = new Buzz\Message\Response();
+            $this->responseContent = null;
+
+            switch( $this->configuration['RequestTypes'][$method] )
+            {
+                case 'get':
+                    $this->request = new Buzz\Message\Request();
+                    break;
+                case 'ajax':
+                    // todo enrichissement du post pour l'ajax
+                case 'post':
+                    $this->request = new Buzz\Message\FormRequest();
+                    break;
+            }
+
+            // déclenche les actions spécifiques à ce service / methode
+            // en termes de construction de la requete
+            $this->populateRequest();
+
+            $this->request->setHost( $server );
+            $this->request->setResource( $uri );
+
+            $this->client->send( $this->request, $this->response );
+
+            // déclenche les actions spécifiques à ce service / methode
+            // en termes de gestion de la réponse
+            $this->handleResponse();
         }
-
-        // déclenche les actions spécifiques à ce service / methode
-        // en termes de construction de la requete
-        $this->populateRequest();
-
-        $this->request->setHost( $server );
-        $this->request->setResource( $uri );
-
-        $client = new Buzz\Client\Curl();
-        $client->send( $this->request, $this->response );
-
-        // déclenche les actions spécifiques à ce service / methode
-        // en termes de gestion de la réponse
-        $this->handleResponse();
+        catch( Exception $e )
+        {
+            echo $e->getMessage();
+        }
     }
-
-    /**
-     *
-     * Build the URL
-     *
-     * @todo Validates URL with regexp
-     *
-     * @param string $serveur
-     * @param string $uri
-     * @param integer $port
-     * @param string $protocol
-     *
-     * @return string
-     */
-    public function buildURL( $serveur, $uri, $port = 80, $protocol = 'http'  )
-    {
-        return "{$protocol}://{$serveur}:{$port}{$uri}";
-    }
-
 
     private function populateRequest()
     {
@@ -126,6 +135,8 @@ abstract class ezsfService
         {
             $this->$preMethodName();
         }
+
+        // traitements génériques ici
 
         // post 'request' trigger
         if( method_exists( $this, $postMethodName ) )
@@ -146,11 +157,8 @@ abstract class ezsfService
             $this->$preMethodName();
         }
 
-        /* @var $response Buzz\Message\Response */
-        $response = $this->response;
-
-        $returnCode = $response->getStatusCode();
-        $this->responseContent = $response->getContent();
+        // traitements génériques
+        // ICI
 
         // 'post' response trigger
         if( method_exists( $this, $postMethodName ) )
@@ -211,6 +219,16 @@ abstract class ezsfService
         $options = new ezpExtensionOptions( $optionArray );
 
         return eZExtension::getHandlerClass( $options );
+    }
+
+    protected function getResponseCode()
+    {
+        return $this->response->getStatusCode();
+    }
+
+    public function getJSONResponse()
+    {
+        return json_decode( $this->getResponseContent() );
     }
 }
 

@@ -1,0 +1,164 @@
+<?php
+
+/**
+ *
+ * Usage :
+ *
+ * $service = ezsfService::get( 'Account' );
+ * $credentials = array( '_username' => 'b2c1@france.fr',
+                         '_password' => 'sensio' );
+ * $service->authenticate( $credentials );
+ *
+ * $service->isLoggedIn();
+ * $service->getUserData();
+ *
+ *
+ */
+class ezsfServiceAccountHandler extends ezsfService
+{
+    /**
+     *
+     * @todo à mettre dans fichier de config
+     * @var string
+     */
+    const REDIRECT_AFTER_LOGIN_CHECK = '/auth/ecom/dump.json';
+
+    /**
+     *
+     * @var Buzz\Cookie\Cookie
+     */
+    private $token;
+
+    private $logged = false;
+
+    /**
+     *
+     * Returns an array containing the method provided by the service
+     *
+     * @todo load from settings
+     *
+     * @return array
+     */
+    public function availableMethods()
+    {
+        return array( 'Authenticate' );
+    }
+
+    /**
+     *
+     * For security reason
+     * This service can not be called using /sf/service/Account/Authenticate
+     *
+     * @return type
+     */
+    public function availableThroughServiceModule()
+    {
+        return false;
+    }
+
+    /**
+     *
+     * Adds the needed inputs to the post request
+     * Also initialise the session through a first fake call to the service
+     *
+     * @todo add validation on username and password
+     *
+     */
+    public function preAuthenticateRequest()
+    {
+        $username = $this->requestArguments['_username'];
+        $password = $this->requestArguments['_password'];
+
+        // première initialisation de la session
+        $this->request->setMethod(Buzz\Message\Request::METHOD_GET);
+        $this->request->setResource( $this->configuration['URI'][$this->currentMethod] );
+        $this->request->setHost($this->configuration['Server']);
+
+        // empeche la redirection pour permettre d'y rajouter un cookie
+        $this->client->setMaxRedirects(0);
+        $this->client->send($this->request, $this->response);
+
+        // requete d'authentification
+        $this->request = new Buzz\Message\FormRequest();
+        $this->request->setField( '_username', $username );
+        $this->request->setField( '_password', $password );
+        $this->request->setField( '_target_path', self::REDIRECT_AFTER_LOGIN_CHECK );
+        $this->request->addHeader($this->getCookieToken()->toCookieHeader());
+
+        $this->response = new Buzz\Message\Response();
+
+    }
+
+    /**
+     *
+     * Gère la réponse
+     *
+     * @todo gérer les autres codes de retour
+     */
+    public function postAuthenticateResponse()
+    {
+        if( $this->getResponseCode() == 302 )
+        {
+            if (preg_match('/'.preg_quote( self::REDIRECT_AFTER_LOGIN_CHECK , '/').'$/', $this->response->getHeader('location'))) {
+                $this->logged = true;
+                $token = $this->getCookieToken();
+
+                $this->request = new Buzz\Message\Request( Buzz\Message\Request::METHOD_GET);
+                $this->request->fromUrl($this->response->getHeader('location'));
+                $this->request->addHeader($token->toCookieHeader());
+
+                $this->response = new Buzz\Message\Response();
+                $this->client->send($this->request, $this->response);
+            }
+        }
+    }
+
+    /**
+     *
+     * Return the token as a Buzz\Cookie\Cookie instance
+     * Contructed used the first response
+     *
+     * @todo cleanup
+     *
+     * @return Buzz\Cookie\Cookie
+     */
+    public function getCookieToken()
+    {
+        if(!$this->token)
+        {
+            $this->token = new Buzz\Cookie\Cookie();
+            $this->token->fromSetCookieHeader($this->response->getHeader('Set-Cookie'), $this->request->getHost() );
+        }
+
+        return $this->token;
+    }
+
+    /**
+     *
+     * Return true if successfully logged in
+     *
+     * @return bool
+     */
+    public function isLoggedIn()
+    {
+        return $this->logged;
+    }
+
+    /**
+     *
+     * Returns the token string
+     *
+     * @return string
+     */
+    public function getToken()
+    {
+        return $this->getCookieToken()->getValue();
+    }
+
+    public function getUserData()
+    {
+        return $this->isLoggedIn() ? json_decode( $this->getResponseContent() ) : false;
+    }
+
+
+}

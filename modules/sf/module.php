@@ -3,12 +3,14 @@
 $Module = array( 'name' => 'Symfony Service Router' );
 
 $ViewList = array();
-
-// /sf/service/<ServiceName>/<Params>
 $ViewList['service'] = array(
     'script' => 'service.php',
-    'params' => array( 'Service' )
+    'params' => array( 'Service', 'Method' ),
+    'functions' => array( 'sfservice' )
     );
+
+$FunctionList = array();
+$FunctionList['sfservice'] = array();
 
 
 ?>
