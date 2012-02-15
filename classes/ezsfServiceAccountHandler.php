@@ -12,6 +12,8 @@
  * $service->isLoggedIn();
  * $service->getUserData();
  *
+ * @property ezsfServiceMethod $Authenticate
+ *
  *
  */
 class ezsfServiceAccountHandler extends ezsfService
@@ -22,6 +24,7 @@ class ezsfServiceAccountHandler extends ezsfService
      * @var string
      */
     const REDIRECT_AFTER_LOGIN_CHECK = '/auth/ecom/dump.json';
+    const SERVICE_NAME = 'Account';
 
     /**
      *
@@ -157,7 +160,7 @@ class ezsfServiceAccountHandler extends ezsfService
 
     public function getUserData()
     {
-        return $this->isLoggedIn() ? json_decode( $this->getResponseContent() ) : false;
+        return $this->isLoggedIn() ? json_decode( $this->response->getContent() ) : false;
     }
 
 
