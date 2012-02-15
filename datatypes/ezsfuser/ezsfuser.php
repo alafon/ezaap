@@ -26,6 +26,10 @@ class ezsfUser
         }
     }
 
+    /**
+     *
+     * @return ezsfUser
+     */
     static function getFromSessionObject()
     {
         // hack

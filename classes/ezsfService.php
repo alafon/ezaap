@@ -41,7 +41,13 @@ abstract class ezsfService
     protected $requestArguments;
 
 
+    /**
+     *
+     * @var string
+     */
     protected $responseContent;
+
+    protected $tokenToUse = null;
 
     /**
      *
@@ -51,12 +57,22 @@ abstract class ezsfService
      */
     protected $currentMethod;
 
-    public function __construct( $serviceName )
+    /**
+     *
+     * @param string $serviceName
+     * @param boolean $useCurrentTolen
+     */
+    public function __construct( $serviceName, $useCurrentTolen = false )
     {
         $this->serviceName = $serviceName;
 
         $ini = eZINI::instance( self::CONFIG_FILE );
         $this->configuration = $ini->BlockValues["{$serviceName}Settings"];
+
+        if( $useCurrentTolen )
+        {
+            $this->tokenToUse = ezsfUser::getFromSessionObject()->token;
+        }
 
         $this->client = new Buzz\Client\Curl();
 
@@ -141,6 +157,13 @@ abstract class ezsfService
             $this->$preMethodName();
         }
 
+        if( $this->tokenToUse )
+        {
+            $cookie = new \Buzz\Cookie\Cookie();
+            $cookie->setAttribute( 'token', $this->tokenToUse );
+            $this->request->addHeader( $cookie->toCookieHeader() );
+        }
+
         // traitements génériques ici
 
         // post 'request' trigger
@@ -186,9 +209,10 @@ abstract class ezsfService
     /**
      *
      * @param string $serviceName
+     * @param boolean $useCurrentToken
      * @return ezsfService
      */
-    public static function get( $serviceName )
+    public static function get( $serviceName, $useCurrentToken = false )
     {
         // Lazy loading
         if( isset( self::$services[$serviceName] ) )
@@ -209,10 +233,10 @@ abstract class ezsfService
      * @param string $serviceName
      * @return sfService
      */
-    private static function loadService( $serviceName )
+    private static function loadService( $serviceName, $useCurrentToken = false )
     {
         // for futur usage
-        $handlerParams = array( $serviceName );
+        $handlerParams = array( $serviceName, $useCurrentToken );
 
         // get the handler using ezp api
         $iniBlockName = "{$serviceName}Settings";
