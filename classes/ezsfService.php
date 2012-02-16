@@ -223,6 +223,8 @@ abstract class ezsfService
         {
             $this->addTokenToRequest();
         }
+        $this->addLocaleToRequest();
+
 
         // post 'request' trigger
         if( method_exists( $this, $postMethodName ) )
@@ -311,6 +313,11 @@ abstract class ezsfService
     public function getJSONResponse()
     {
         return json_decode( $this->getResponseContent() );
+    }
+
+    protected function addLocaleToRequest()
+    {
+        $this->request->addHeader( "eZ-Locale: " . substr( eZLocale::currentLocaleCode(), 0, 2 ) );
     }
 
     public function setRoutePrefix( $prefix )
