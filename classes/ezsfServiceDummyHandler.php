@@ -56,11 +56,6 @@ class ezsfServiceDummyHandler extends ezsfService
             self::transformToFormRequest( $this->request );
             $this->request->addFields( $_POST );
         }
-
-        if( $this->configuration['AlwaysAddToken'] == 'true' )
-        {
-            $this->addTokenToRequest();
-        }
     }
 
     public function postDummyResponse()

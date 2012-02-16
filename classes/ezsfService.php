@@ -10,6 +10,8 @@ abstract class ezsfService
     const CONFIG_FILE = 'ezsfservice.ini';
     const COOKIE_TOKEN_NAME = '_token';
     const ROUTE_PREFIX_GET_PARAMETER = 'route_prefix';
+    const DEFAULT_TIMEOUT = 50;
+    const LOG_FILE = "ezsf";
 
     protected $configuration;
 
@@ -80,8 +82,7 @@ abstract class ezsfService
 
         $this->client = new Buzz\Client\Curl();
 
-        // debug since backend is so slow
-        $this->client->setTimeout( 10 );
+        $this->client->setTimeout( self::DEFAULT_TIMEOUT );
     }
 
     /**
@@ -166,10 +167,17 @@ abstract class ezsfService
             // déclenche les actions spécifiques à ce service / methode
             // en termes de gestion de la réponse
             $this->handleResponse();
+            $this->log();
         }
         catch( Exception $e )
         {
-            echo $e->getMessage();
+            // ici on ne gère que le code d'erreur timeout pour curl
+            // les codes erreurs pour les autres clients seront
+            // vraisemblablement différents
+            if( $e->getCode() == CURLE_OPERATION_TIMEOUTED )
+            {
+                $this->responseContent = "Timeout";
+            }
         }
     }
 
@@ -178,18 +186,14 @@ abstract class ezsfService
         if( $token === false )
         {
             // try to use a token already set
-            if( $this->tokenToUse )
+            if( !$this->tokenToUse )
             {
-                $token = $this->tokenToUse;
-            }
-            else
-            {
-                $token = ezsfUser::getFromSessionObject()->token;
+                $this->tokenToUse = ezsfUser::getFromSessionObject()->token;
             }
         }
         $cookie = new \Buzz\Cookie\Cookie();
         $cookie->setName( self::COOKIE_TOKEN_NAME );
-        $cookie->setValue( $token );
+        $cookie->setValue( $this->tokenToUse );
         $this->request->addHeader( $cookie->toCookieHeader() );
     }
 
@@ -206,15 +210,19 @@ abstract class ezsfService
             $this->$preMethodName();
         }
 
+        // traitements génériques effectués sur toutes les requetes
+        // ajoute le prefix si $this->routePrefix n'est pas null
+        $this->addRoutePrefixToRequest();
+        // ajout le token si fixé
         if( $this->tokenToUse )
         {
             $this->addTokenToRequest( $this->tokenToUse );
         }
-
-        // ajoute le prefix si $this->routePrefix n'est pas null
-        $this->addRoutePrefixToRequest();
-
-        // traitements génériques ici
+        // ajoute le token en se basant sur la config si possible
+        elseif( $this->configuration['AlwaysAddToken'] == 'true' )
+        {
+            $this->addTokenToRequest();
+        }
 
         // post 'request' trigger
         if( method_exists( $this, $postMethodName ) )
@@ -236,7 +244,10 @@ abstract class ezsfService
         }
 
         // traitements génériques
-        // ICI
+        if( $this->response->getStatusCode() == 500 )
+        {
+            $this->responseContent = "Erreur 500 sur le backend";
+        }
 
         // 'post' response trigger
         if( method_exists( $this, $postMethodName ) )
@@ -333,6 +344,15 @@ abstract class ezsfService
         $newRequest->setResource( $request->getResource() );
         $newRequest->setHeaders( $request->getHeaders() );
         $request = $newRequest;
+    }
+
+    protected function log()
+    {
+        $logFile = self::LOG_FILE . "_{$this->serviceName}.log";
+        $message =  "\nREQ - Resource: {$this->request->getResource()} Method: {$this->request->getMethod()}";
+        $message .= "\nREQ - Token: " . $this->tokenToUse;
+        $message .= "\nRES - ContentLength: " . strlen($this->response->getContent()) . " Status Code: {$this->response->getStatusCode()}";
+        eZLog::write( $message, $logFile );
     }
 }
 
