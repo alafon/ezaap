@@ -38,6 +38,7 @@ class ezsfServiceUserHandler extends ezsfService
 
     public function preBannerRequest()
     {
+        $this->setRoutePrefix( '/sf/service/User/Banner' );
         $this->addTokenToRequest();
     }
     public function preBannerResponse()
