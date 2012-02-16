@@ -350,6 +350,13 @@ abstract class ezsfService
         $this->request->setResource( $newResource );
     }
 
+    /**
+     *
+     * Transforms a Buzz\Message\Request into a Buzz\Message\FormRequest
+     * and keeps host, resource and headers set in the Request
+     *
+     * @param \Buzz\Message\Request $request
+     */
     protected static function transformToFormRequest( \Buzz\Message\Request &$request )
     {
         $newRequest = new Buzz\Message\FormRequest();
@@ -359,6 +366,11 @@ abstract class ezsfService
         $request = $newRequest;
     }
 
+    /**
+     *
+     * Logs information about the request and the response
+     *
+     */
     protected function log()
     {
         $logFile = self::LOG_FILE . "_{$this->serviceName}.log";

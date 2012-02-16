@@ -33,5 +33,4 @@ $prefix .= "/{$serviceName}/{$methodToCall}";
 $service->setRoutePrefix( $prefix );
 $service->$methodToCall( $params );
 
-//$Result['pagelayout'] = false;
 $Result['content'] = $service->getResponseContent();
