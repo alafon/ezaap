@@ -1,0 +1,1 @@
+{include uri='design:user_banner.tpl'}
