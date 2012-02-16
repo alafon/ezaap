@@ -15,6 +15,12 @@ abstract class ezsfService
 
     protected $configuration;
 
+    /**
+     *
+     * The name of the current service
+     *
+     * @var string
+     */
     private $serviceName;
 
     /**
