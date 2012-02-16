@@ -77,19 +77,28 @@ class ezsfServiceAccountHandler extends ezsfService
         $this->request->setResource( $this->configuration['URI'][$this->currentMethod] );
         $this->request->setHost($this->configuration['Server']);
 
+        // save host and resource
+        $host = $this->request->getHost();
+        $resource = $this->request->getResource();
+
+
         // empeche la redirection pour permettre d'y rajouter un cookie
         $this->client->setMaxRedirects(0);
         $this->client->send($this->request, $this->response);
 
         // requete d'authentification
         $this->request = new Buzz\Message\FormRequest();
+
+        // re-set host and resource
+        $this->request->setResource( $resource );
+        $this->request->setHost( $host );
+
         $this->request->setField( '_username', $username );
         $this->request->setField( '_password', $password );
         $this->request->setField( '_target_path', self::REDIRECT_AFTER_LOGIN_CHECK );
         $this->request->addHeader($this->getCookieToken()->toCookieHeader());
 
         $this->response = new Buzz\Message\Response();
-
     }
 
     /**
