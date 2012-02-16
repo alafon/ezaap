@@ -18,14 +18,13 @@ class ezsfServiceUserHandler extends ezsfService
 
     /**
      *
-     * For security reason
-     * This service can not be called using /sf/service/User/Edit
+     * Available in module mode using /sf/service/User/xxx
      *
      * @return type
      */
     public function availableThroughServiceModule()
     {
-        return false;
+        return true;
     }
 
     public function preEditRequest()
