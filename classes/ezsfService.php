@@ -181,23 +181,6 @@ abstract class ezsfService
         }
     }
 
-    protected function addTokenToRequest( $token = false )
-    {
-        if( $token === false )
-        {
-            // try to use a token already set
-            if( !$this->tokenToUse )
-            {
-                $this->tokenToUse = ezsfUser::getFromSessionObject()->token;
-            }
-        }
-        $cookie = new \Buzz\Cookie\Cookie();
-        $cookie->setName( self::COOKIE_TOKEN_NAME );
-        $cookie->setValue( $this->tokenToUse );
-        $this->request->addHeader( $cookie->toCookieHeader() );
-    }
-
-
     private function populateRequest()
     {
         $methodNameSuffix = ucfirst( $this->currentMethod ) . "Request";
@@ -318,6 +301,22 @@ abstract class ezsfService
     protected function addLocaleToRequest()
     {
         $this->request->addHeader( "eZ-Locale: " . substr( eZLocale::currentLocaleCode(), 0, 2 ) );
+    }
+
+    protected function addTokenToRequest( $token = false )
+    {
+        if( $token === false )
+        {
+            // try to use a token already set
+            if( !$this->tokenToUse )
+            {
+                $this->tokenToUse = ezsfUser::getFromSessionObject()->token;
+            }
+        }
+        $cookie = new \Buzz\Cookie\Cookie();
+        $cookie->setName( self::COOKIE_TOKEN_NAME );
+        $cookie->setValue( $this->tokenToUse );
+        $this->request->addHeader( $cookie->toCookieHeader() );
     }
 
     public function setRoutePrefix( $prefix )
