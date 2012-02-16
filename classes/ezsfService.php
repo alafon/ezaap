@@ -8,6 +8,8 @@
 abstract class ezsfService
 {
     const CONFIG_FILE = 'ezsfservice.ini';
+    const COOKIE_TOKEN_NAME = '_token';
+    const ROUTE_PREFIX_GET_PARAMETER = 'route_prefix';
 
     protected $configuration;
 
@@ -56,19 +58,22 @@ abstract class ezsfService
      */
     protected $currentMethod;
 
+    protected $routePrefix;
+
+
     /**
      *
      * @param string $serviceName
-     * @param boolean $useCurrentTolen
+     * @param boolean $useCurrentUserToken
      */
-    public function __construct( $serviceName, $useCurrentTolen = false )
+    public function __construct( $serviceName, $useCurrentUserToken = false )
     {
         $this->serviceName = $serviceName;
 
         $ini = eZINI::instance( self::CONFIG_FILE );
         $this->configuration = $ini->BlockValues["{$serviceName}Settings"];
 
-        if( $useCurrentTolen )
+        if( $useCurrentUserToken )
         {
             $this->tokenToUse = ezsfUser::getFromSessionObject()->token;
         }
@@ -79,11 +84,18 @@ abstract class ezsfService
         $this->client->setTimeout( 10 );
     }
 
+    /**
+     * A reimpl pour indiquer la liste des methodes providées par le Service
+     *
+     * Doit retourner un tableau
+     */
     abstract public function availableMethods();
 
     /**
      * A reimpl pour indiquer si le service symfony peut etre appelé par le
      * proxy eZ Publish /sf/service/<servicename>/<method>
+     *
+     * Doit retourner un booleen
      */
     abstract public function availableThroughServiceModule();
 
@@ -107,30 +119,47 @@ abstract class ezsfService
             }
             $this->currentMethod = $method;
 
-            $uri = $this->configuration['URI'][$method];
+            // est-ce que l'URI a appelé est configuré
+            if( isset( $this->configuration['URI'][$method] ) )
+            {
+                $uri = $this->configuration['URI'][$method];
+            }
+            else
+            {
+                $uri = '/';
+            }
+
             $server = $this->configuration['Server'];
 
             $this->response = new Buzz\Message\Response();
+            // reinit responseContent in case that we call several methods on
+            // a single service
             $this->responseContent = null;
 
-            switch( $this->configuration['RequestTypes'][$method] )
+            if( isset($this->configuration['RequestTypes'][$method] ) )
+                $requestType = $this->configuration['RequestTypes'][$method];
+            else
+                $requestType = 'notconfigured';
+
+            // predefines $this->request using configuration settings if possible
+            switch( $requestType )
             {
-                case 'get':
-                    $this->request = new Buzz\Message\Request();
-                    break;
                 case 'ajax':
                     // todo enrichissement du post pour l'ajax
                 case 'post':
                     $this->request = new Buzz\Message\FormRequest();
                     break;
+                case 'get':
+                default:
+                    $this->request = new Buzz\Message\Request();
+                    break;
             }
+            $this->request->setHost( $server );
+            $this->request->setResource( $uri );
 
             // déclenche les actions spécifiques à ce service / methode
             // en termes de construction de la requete
             $this->populateRequest();
-
-            $this->request->setHost( $server );
-            $this->request->setResource( $uri );
 
             $this->client->send( $this->request, $this->response );
 
@@ -143,6 +172,27 @@ abstract class ezsfService
             echo $e->getMessage();
         }
     }
+
+    protected function addTokenToRequest( $token = false )
+    {
+        if( $token === false )
+        {
+            // try to use a token already set
+            if( $this->tokenToUse )
+            {
+                $token = $this->tokenToUse;
+            }
+            else
+            {
+                $token = ezsfUser::getFromSessionObject()->token;
+            }
+        }
+        $cookie = new \Buzz\Cookie\Cookie();
+        $cookie->setName( self::COOKIE_TOKEN_NAME );
+        $cookie->setValue( $token );
+        $this->request->addHeader( $cookie->toCookieHeader() );
+    }
+
 
     private function populateRequest()
     {
@@ -158,10 +208,11 @@ abstract class ezsfService
 
         if( $this->tokenToUse )
         {
-            $cookie = new \Buzz\Cookie\Cookie();
-            $cookie->setAttribute( 'token', $this->tokenToUse );
-            $this->request->addHeader( $cookie->toCookieHeader() );
+            $this->addTokenToRequest( $this->tokenToUse );
         }
+
+        // ajoute le prefix si $this->routePrefix n'est pas null
+        $this->addRoutePrefixToRequest();
 
         // traitements génériques ici
 
@@ -249,6 +300,39 @@ abstract class ezsfService
     public function getJSONResponse()
     {
         return json_decode( $this->getResponseContent() );
+    }
+
+    public function setRoutePrefix( $prefix )
+    {
+        $this->routePrefix = $prefix;
+    }
+
+    protected function addRoutePrefixToRequest()
+    {
+        if( !is_null($this->routePrefix) )
+            $this->addGetParameter( self::ROUTE_PREFIX_GET_PARAMETER, $this->routePrefix );
+    }
+
+    protected function addGetParameter( $key, $value )
+    {
+        $currentResource = $this->request->getResource();
+
+        $parseURL = parse_url( $currentResource );
+        $path = $parseURL['path'];
+        $query = is_null( $parseURL['query'] ) ? "" : $parseURL['query'];
+        $query .= "&{$key}={$value}";
+
+        $newResource = "{$path}" . (strlen($query)?"?{$query}":"");
+        $this->request->setResource( $newResource );
+    }
+
+    protected static function transformToFormRequest( \Buzz\Message\Request &$request )
+    {
+        $newRequest = new Buzz\Message\FormRequest();
+        $newRequest->setHost( $request->getHost() );
+        $newRequest->setResource( $request->getResource() );
+        $newRequest->setHeaders( $request->getHeaders() );
+        $request = $newRequest;
     }
 }
 
