@@ -15,6 +15,8 @@ class ezsfUser
     public $business;
     public $country;
 
+    public $cookies = array();
+
     function __construct( $ezsfData = false )
     {
         if( $ezsfData !== false )
@@ -24,6 +26,7 @@ class ezsfUser
                 $this->$attribute = $value;
             }
         }
+        $this->setCookie( '_token', $this->token );
     }
 
     /**
@@ -42,6 +45,30 @@ class ezsfUser
 
         $sessionObject = eZSession::get( self::SESSION_VARNAME );
         return $sessionObject;
+    }
+
+    /**
+     *
+     * @return ezsfUser
+     */
+    static public function instance()
+    {
+        return self::getFromSessionObject();
+    }
+
+    public function setCookie( $key, $value )
+    {
+        $this->cookies[$key] = $value;
+    }
+
+    public function hasCookie( $key )
+    {
+        return array_key_exists( $key, $this->cookies );
+    }
+
+    public function getCookie( $key )
+    {
+        return $this->hasCookie( $key ) ? $this->cookies[$key] : null;
     }
 
     function attributes()

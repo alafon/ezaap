@@ -57,7 +57,7 @@ class ezsfServiceAccountHandler extends ezsfService
      */
     public function availableThroughServiceModule()
     {
-        return false;
+        return true;
     }
 
     /**

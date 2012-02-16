@@ -10,7 +10,7 @@ abstract class ezsfService
     const CONFIG_FILE = 'ezsfservice.ini';
     const COOKIE_TOKEN_NAME = '_token';
     const ROUTE_PREFIX_GET_PARAMETER = 'route_prefix';
-    const DEFAULT_TIMEOUT = 50;
+    const DEFAULT_TIMEOUT = 10;
     const LOG_FILE = "ezsf";
 
     protected $configuration;
@@ -87,8 +87,6 @@ abstract class ezsfService
      */
     protected $currentMethod;
 
-
-
     /**
      *
      * @param string $serviceName
@@ -98,6 +96,7 @@ abstract class ezsfService
     {
         $this->serviceName = $serviceName;
 
+        // todo handler de configuration par method
         $ini = eZINI::instance( self::CONFIG_FILE );
         $this->configuration = $ini->BlockValues["{$serviceName}Settings"];
 
@@ -107,7 +106,6 @@ abstract class ezsfService
         }
 
         $this->client = new Buzz\Client\Curl();
-
         $this->client->setTimeout( self::DEFAULT_TIMEOUT );
     }
 
@@ -194,6 +192,7 @@ abstract class ezsfService
             // en termes de gestion de la réponse
             $this->handleResponse();
             $this->log();
+            //var_dump( $this->request, $this->response );
         }
         catch( Exception $e )
         {
@@ -234,6 +233,18 @@ abstract class ezsfService
         }
         $this->addLocaleToRequest();
 
+        // Add cookies stored in the User Session
+        $userCookies = ezsfUser::instance()->cookies;
+        if( !empty ( $userCookies ))
+        {
+            $cookiesHeader = array();
+            foreach( $userCookies as $name => $value )
+            {
+                $cookiesHeader[] = "$name=$value";
+            }
+            $cookieString = "Cookie: " . implode( "; ", $cookiesHeader );
+            $this->request->addHeader( $cookieString );
+        }
 
         // post 'request' trigger
         if( method_exists( $this, $postMethodName ) )
@@ -258,6 +269,15 @@ abstract class ezsfService
         if( $this->response->getStatusCode() == 500 )
         {
             $this->responseContent = "Erreur 500 sur le backend";
+        }
+
+        // deal with response containing set-cookie header
+        // store it in the eZ user session
+        if( $this->response->getHeader( 'Set-Cookie' ))
+        {
+            $cookie = new \Buzz\Cookie\Cookie();
+            $cookie->fromSetCookieHeader($this->response->getHeader( 'Set-Cookie' ) );
+            ezsfUser::instance()->setCookie( $cookie->getName(), $cookie->getValue() );
         }
 
         // 'post' response trigger
