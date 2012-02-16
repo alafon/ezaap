@@ -18,8 +18,5 @@ LoginHandler[]=standard
 [TemplateSettings]
 ExtensionAutoloadPath[]=sfconnect
 
-[DebugSettings]
-DebugOutput=enabled
-
 */ ?>
 
