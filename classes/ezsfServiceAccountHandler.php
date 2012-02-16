@@ -9,6 +9,7 @@
                          '_password' => 'sensio' );
  * $service->authenticate( $credentials );
  *
+ * Availables public methods
  * $service->isLoggedIn();
  * $service->getUserData();
  *
