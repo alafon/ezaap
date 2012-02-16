@@ -104,7 +104,7 @@ class ezsfServiceAccountHandler extends ezsfService
 
     /**
      *
-     * Gère la réponse
+     * Gère la réponse après authentification
      *
      * @todo gérer les autres codes de retour
      */
@@ -112,11 +112,16 @@ class ezsfServiceAccountHandler extends ezsfService
     {
         if( $this->getResponseCode() == 302 )
         {
-            if (preg_match('/'.preg_quote( self::REDIRECT_AFTER_LOGIN_CHECK , '/').'$/', $this->response->getHeader('location'))) {
+            // if redirected to the requested URI (/auth/ecom/dump.json)
+            // means that we are logged
+            if (preg_match('/'.preg_quote( self::REDIRECT_AFTER_LOGIN_CHECK , '/').'$/', $this->response->getHeader('location')))
+            {
+                // usefull
                 $this->logged = true;
+
                 $token = $this->getCookieToken();
 
-                $this->request = new Buzz\Message\Request( Buzz\Message\Request::METHOD_GET);
+                $this->request = new Buzz\Message\Request( Buzz\Message\Request::METHOD_GET );
                 $this->request->fromUrl($this->response->getHeader('location'));
                 $this->request->addHeader($token->toCookieHeader());
 

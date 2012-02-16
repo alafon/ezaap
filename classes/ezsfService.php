@@ -44,11 +44,34 @@ abstract class ezsfService
 
     /**
      *
+     * The response which will be made available outside this class (using
+     * getResponseContent())
+     *
      * @var string
      */
     protected $responseContent;
 
+    /**
+     *
+     * Variable used to add a token
+     *
+     * @var string
+     */
     protected $tokenToUse = null;
+
+    /**
+     *
+     * Variable used to add a route prefix
+     *
+     * @var string
+     */
+    protected $routePrefix;
+
+    /**
+     *
+     * @var Buzz\Client\Curl
+     */
+    protected $client;
 
     /**
      *
@@ -58,7 +81,6 @@ abstract class ezsfService
      */
     protected $currentMethod;
 
-    protected $routePrefix;
 
 
     /**
