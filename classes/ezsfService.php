@@ -25,8 +25,6 @@ abstract class ezsfService
      */
     protected $response;
 
-    protected $responseCode;
-
     /**
      *
      * The buzz request instance (can be Request or FormRequest)
