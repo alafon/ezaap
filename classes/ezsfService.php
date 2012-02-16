@@ -324,10 +324,17 @@ abstract class ezsfService
         $this->routePrefix = $prefix;
     }
 
+    /**
+     * Adds the route prefix used by the backend to generate urls
+     * Set in GET parameters and headers (not used by the backend)
+     */
     protected function addRoutePrefixToRequest()
     {
         if( !is_null($this->routePrefix) )
+        {
             $this->addGetParameter( self::ROUTE_PREFIX_GET_PARAMETER, $this->routePrefix );
+            $this->request->addHeader( "eZ-Route-Prexix: {$this->routePrefix}" );
+        }
     }
 
     protected function addGetParameter( $key, $value )
