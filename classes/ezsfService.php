@@ -203,6 +203,10 @@ abstract class ezsfService
             {
                 $this->responseContent = "Timeout";
             }
+            else
+            {
+                eZDebug::writeDebug( "Catch exception : {$e->getMessage()}", __CLASS__ );
+            }
         }
     }
 
