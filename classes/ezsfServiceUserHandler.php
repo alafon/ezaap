@@ -4,20 +4,6 @@ class ezsfServiceUserHandler extends ezsfService
 {
     /**
      *
-     * Returns an array containing the method provided by the service
-     *
-     * @todo load from settings
-     *
-     * @return array
-     */
-    public function availableMethods()
-    {
-        return array( 'Edit',
-                      'Banner' );
-    }
-
-    /**
-     *
      * Available in module mode using /sf/service/User/xxx
      *
      * @return type

@@ -109,12 +109,10 @@ abstract class ezsfService
         $this->client->setTimeout( self::DEFAULT_TIMEOUT );
     }
 
-    /**
-     * A reimpl pour indiquer la liste des methodes providées par le Service
-     *
-     * Doit retourner un tableau
-     */
-    abstract public function availableMethods();
+    private function availableMethods()
+    {
+        return $this->configuration['AvailableMethods'];
+    }
 
     /**
      * A reimpl pour indiquer si le service symfony peut etre appelé par le
