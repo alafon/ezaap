@@ -389,7 +389,7 @@ abstract class ezsfService
 
         $parseURL = parse_url( $currentResource );
         $path = $parseURL['path'];
-        $query = is_null( $parseURL['query'] ) ? "" : $parseURL['query'];
+        $query = !isset( $parseURL['query'] ) ? "" : $parseURL['query'];
         $query .= "&{$key}={$value}";
 
         $newResource = "{$path}" . (strlen($query)?"?{$query}":"");
