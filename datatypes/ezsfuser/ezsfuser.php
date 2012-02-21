@@ -85,6 +85,22 @@ class ezsfUser
     {
         return $this->$key;
     }
+
+    function store()
+    {
+        eZSession::set( self::SESSION_VARNAME , $this );
+    }
+
+    /**
+     *
+     * Returns the business id if selected, otherwise returns false
+     *
+     * @return type
+     */
+    public function selectedBusiness()
+    {
+        return ($this->business != 0 ? $this->business : false);
+    }
 }
 
 ?>

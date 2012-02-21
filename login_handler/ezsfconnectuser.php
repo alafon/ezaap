@@ -2,6 +2,16 @@
 
 /**
  * Login handler used to connect a user
+ *
+ * Note : defined roles in the middleoffice
+ *
+   const ROLE_ADMIN                = 0;
+   const ROLE_PURCHASER            = 1;
+   const ROLE_LEGAL_REPRESENTATIVE = 2;
+   const ROLE_ACCOUNTANT           = 3;
+   const ROLE_CREATOR              = 4;
+   const ROLE_TCA                  = 5;
+ * 
  */
 class ezsfConnectUser extends eZUser
 {

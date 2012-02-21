@@ -118,6 +118,45 @@ class ezsfServiceAccountHandler extends ezsfService
         }
     }
 
+    protected function preBusinessSelectRequest()
+    {
+        if( $this->requestArguments['post_request'] )
+        {
+            $this->request->addFields( $_POST );
+
+        }
+    }
+
+    protected function postBusinessSelectResponse()
+    {
+        $ezsfuser = ezsfUser::instance();
+        $ezsfuser->business = $this->getJSONResponse()->business;
+        $ezsfuser->store();
+    }
+
+
+    protected function postBusinessListResponse()
+    {
+        // If GET method, means that we are asking which businesses a user has
+        // access to
+        if( $this->request->getMethod() == Buzz\Message\Request::METHOD_GET )
+        {
+            $businessList = array();
+            // Replace BusinessList by BusinessSelect
+            $formURL = str_replace( $this->currentMethod, 'BusinessSelect', $this->getCurrentURI() );
+            foreach( $this->getJSONResponse() as $business )
+            {
+                $businessList[$business->id] = array( 'label' => $business->name );
+            }
+            $selectedBusinessID = ezsfUser::instance()->selectedBusiness();
+            $selectedBusinessName = $businessList[$selectedBusinessID]['label'];
+            $this->responseContent = array( 'business_list' => $businessList,
+                                            'form_url' => $formURL,
+                                            'selected_business' => $selectedBusinessID,
+                                            'selected_business_name' => $selectedBusinessName );
+        }
+    }
+
     /**
      *
      * Return the token as a Buzz\Cookie\Cookie instance

@@ -25,7 +25,13 @@ if( is_null( $methodToCall ) )
     return $module->handleError( eZError::KERNEL_MODULE_VIEW_NOT_FOUND, 'kernel' );
 
 $params = array( 'sf_uri' => $sfURI,
-                 'get_parameters' => $_GET );
+                 'get_parameters' => $_GET,
+                 'post_request' => $_SERVER['REQUEST_METHOD'] == Buzz\Message\Request::METHOD_POST );
+
+if($params['post_request'])
+{
+    $params['post_parameters'] = $_POST;
+}
 
 $prefix = $module->Functions['service']['uri'];
 $prefix .= "/{$serviceName}/{$methodToCall}";
