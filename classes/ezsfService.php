@@ -196,14 +196,20 @@ abstract class ezsfService
 
             // déclenche les actions spécifiques à ce service / methode
             // en termes de construction de la requete
+            eZDebug::accumulatorStart( 'request_generation', __CLASS__, 'Request generation' );
             $this->populateRequest();
+            eZDebug::accumulatorStop( 'request_generation' );
 
             // sends the request
+            eZDebug::accumulatorStart( 'request_sending', __CLASS__, 'Request made to the backend' );
             $this->client->send( $this->request, $this->response );
+            eZDebug::accumulatorStop( 'request_sending' );
 
             // déclenche les actions spécifiques à ce service / methode
             // en termes de gestion de la réponse
+            eZDebug::accumulatorStart( 'response_handling', __CLASS__, 'Response handling' );
             $this->handleResponse();
+            eZDebug::accumulatorStop( 'response_handling' );
             $this->log();
             //var_dump( $this->request, $this->response );
         }
