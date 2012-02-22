@@ -277,6 +277,10 @@ abstract class ezsfService
         {
             $this->responseContent = "Erreur 500 sur le backend";
         }
+        elseif( $this->response->getStatusCode() == 404 )
+        {
+            $this->responseContent = "404 not found sur " . $this->request->getUrl();
+        }
 
         // deal with response containing set-cookie header
         // store it in the eZ user session
