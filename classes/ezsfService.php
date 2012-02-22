@@ -1,19 +1,16 @@
 <?php
 
 /**
- *
- * @todo Gérer les timeouts
+ * This class is meant to be extended to define each service you want to
+ * invoke from your templates or your eZ Publish scripts
  *
  */
 abstract class ezsfService
 {
-    const CONFIG_FILE = 'ezsfservice.ini';
     const COOKIE_TOKEN_NAME = '_token';
     const ROUTE_PREFIX_GET_PARAMETER = 'route_prefix';
     const DEFAULT_TIMEOUT = 10;
     const LOG_FILE = "ezsf";
-
-    protected $configuration;
 
     /**
      *
@@ -103,16 +100,19 @@ abstract class ezsfService
 
     /**
      *
+     * @var ezsfServiceConfiguration
+     */
+    protected $configuration;
+
+    /**
+     *
      * @param string $serviceName
      * @param boolean $useCurrentUserToken
      */
     public function __construct( $serviceName, $useCurrentUserToken = false )
     {
         $this->serviceName = $serviceName;
-
-        // todo handler de configuration par method
-        $ini = eZINI::instance( self::CONFIG_FILE );
-        $this->configuration = $ini->BlockValues["{$serviceName}Settings"];
+        $this->configuration = new ezsfServiceConfiguration( $this );
 
         if( $useCurrentUserToken )
         {
@@ -125,7 +125,7 @@ abstract class ezsfService
 
     private function availableMethods()
     {
-        return $this->configuration['AvailableMethods'];
+        return $this->configuration->AvailableMethods;
     }
 
     /**
@@ -146,37 +146,37 @@ abstract class ezsfService
     public function __call( $method, $arguments = array() )
     {
         $this->requestArguments = $arguments[0];
+        $this->currentMethod = $method;
 
         try
         {
+            // Check if the method is defined in the configuration file
             if( array_search( $method, $this->availableMethods()) === false )
             {
-                // @todo page d'erreur eZ si debug désactivé
                 throw new Exception( "Method {$method} non existante dans " . get_called_class() );
             }
-            $this->currentMethod = $method;
 
             // est-ce que l'URI a appelé est configuré
-            if( isset( $this->configuration['URI'][$method] ) )
+            if( $this->configuration->isSetForMethod( 'URI', $method ) )
             {
-                $uri = $this->configuration['URI'][$method];
+                $uri = $this->configuration->getParameter( 'URI', $method );
             }
             else
             {
                 $uri = '/';
             }
 
-            $server = $this->configuration['Server'];
+            $server = $this->configuration->Server;
 
             $this->response = new Buzz\Message\Response();
             // reinit responseContent in case that we call several methods on
             // a single service
             $this->responseContent = null;
 
-            if( isset($this->configuration['RequestTypes'][$method] ) )
-                $requestType = $this->configuration['RequestTypes'][$method];
+            if( $this->configuration->isSetForMethod( 'RequestTypes', $method ) )
+                $requestType = $this->configuration->getParameter( 'RequestTypes', $method );
             else
-                $requestType = 'notconfigured';
+                $requestType = null;
 
             // predefines $this->request using configuration settings if possible
             switch( $requestType )
@@ -211,7 +211,6 @@ abstract class ezsfService
             $this->handleResponse();
             eZDebug::accumulatorStop( 'response_handling' );
             $this->log();
-            //var_dump( $this->request, $this->response );
         }
         catch( Exception $e )
         {
@@ -255,7 +254,7 @@ abstract class ezsfService
             $this->addTokenToRequest( $this->tokenToUse );
         }
         // ajoute le token en se basant sur la config si possible
-        elseif( $this->configuration['AlwaysAddToken'] == 'true' )
+        elseif( $this->configuration->AlwaysAddToken == 'true' )
         {
             $this->addTokenToRequest();
         }
@@ -343,6 +342,11 @@ abstract class ezsfService
 
     }
 
+    public function getServiceName()
+    {
+        return $this->serviceName;
+    }
+
     /**
      * Returns tthe service handler for the given $serviceName
      *
@@ -356,7 +360,7 @@ abstract class ezsfService
 
         // get the handler using ezp api
         $iniBlockName = "{$serviceName}Settings";
-        $optionArray = array( 'iniFile'      => self::CONFIG_FILE,
+        $optionArray = array( 'iniFile'      => ezsfServiceConfiguration::CONFIG_FILE,
                               'iniSection'   => $iniBlockName,
                               'iniVariable'  => 'Handler',
                               'handlerParams'=> $handlerParams );

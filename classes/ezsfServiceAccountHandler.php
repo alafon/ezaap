@@ -64,8 +64,8 @@ class ezsfServiceAccountHandler extends ezsfService
 
         // première initialisation de la session
         $this->request->setMethod(Buzz\Message\Request::METHOD_GET);
-        $this->request->setResource( $this->configuration['URI'][$this->currentMethod] );
-        $this->request->setHost($this->configuration['Server']);
+        $this->request->setResource( $this->configuration->getParameter('URI', $this->currentMethod) );
+        $this->request->setHost($this->configuration->Server);
 
         // save host and resource
         $host = $this->request->getHost();
