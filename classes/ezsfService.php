@@ -196,9 +196,7 @@ abstract class ezsfService
 
             // déclenche les actions spécifiques à ce service / methode
             // en termes de construction de la requete
-            eZDebug::accumulatorStart( 'request_generation', __CLASS__, 'Request generation' );
             $this->populateRequest();
-            eZDebug::accumulatorStop( 'request_generation' );
 
             // sends the request
             eZDebug::accumulatorStart( 'request_sending', __CLASS__, 'Request made to the backend' );
@@ -207,9 +205,7 @@ abstract class ezsfService
 
             // déclenche les actions spécifiques à ce service / methode
             // en termes de gestion de la réponse
-            eZDebug::accumulatorStart( 'response_handling', __CLASS__, 'Response handling' );
             $this->handleResponse();
-            eZDebug::accumulatorStop( 'response_handling' );
             $this->log();
         }
         catch( Exception $e )
@@ -235,6 +231,8 @@ abstract class ezsfService
 
     private function populateRequest()
     {
+        eZDebug::accumulatorStart( 'request_generation', __CLASS__, 'Request generation' );
+
         $methodNameSuffix = ucfirst( $this->currentMethod ) . "Request";
         $preMethodName = "pre{$methodNameSuffix}";
         $postMethodName = "post{$methodNameSuffix}";
@@ -278,10 +276,13 @@ abstract class ezsfService
         {
             $this->$postMethodName();
         }
+        eZDebug::accumulatorStop('request_generation');
     }
 
     private function handleResponse()
     {
+        eZDebug::accumulatorStart( 'response_handling', __CLASS__, 'Response handling' );
+
         $methodNameSuffix = ucfirst( $this->currentMethod ) . "Response";
         $preMethodName = "pre{$methodNameSuffix}";
         $postMethodName = "post{$methodNameSuffix}";
@@ -316,6 +317,7 @@ abstract class ezsfService
         {
             $this->$postMethodName();
         }
+        eZDebug::accumulatorStop('response_handling');
     }
 
     /**
