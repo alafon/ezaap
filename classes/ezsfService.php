@@ -208,6 +208,11 @@ abstract class ezsfService
         }
     }
 
+    protected function getCurrentURI()
+    {
+        return "/sf/service/" . $this->serviceName . "/" . $this->currentMethod;
+    }
+
     private function populateRequest()
     {
         $methodNameSuffix = ucfirst( $this->currentMethod ) . "Request";
