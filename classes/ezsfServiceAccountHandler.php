@@ -40,6 +40,8 @@ class ezsfServiceAccountHandler extends ezsfService
      * For security reason
      * This service can not be called using /sf/service/Account/Authenticate
      *
+     * @todo being able to define this property for each service methods
+     *
      * @return type
      */
     public function availableThroughServiceModule()
