@@ -17,7 +17,7 @@
  *
  *
  */
-class ezaapServiceAccountHandler extends ezaapfService
+class ezaapServiceAccountHandler extends ezaapService
 {
     /**
      *

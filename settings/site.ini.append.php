@@ -12,7 +12,7 @@ PolicyOmitList[]=ezaap/service
 ExtensionDirectory[]=ezaap
 
 LoginHandler[]
-LoginHandler[]=ezaapConnect
+LoginHandler[]=aapConnect
 LoginHandler[]=standard
 
 [TemplateSettings]
