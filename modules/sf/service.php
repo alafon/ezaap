@@ -16,7 +16,7 @@ $service = ezsfService::get( $serviceName );
 if( !$service->availableThroughServiceModule() )
 {
     // à améliorer
-    eZLog::write( "Tentative d'accès au service $serviceName par {$_SERVER["REMOTE_ADDR"]}", "sfconnect_security.log" );
+    eZLog::write( "Tentative d'accès au service $serviceName par {$_SERVER["REMOTE_ADDR"]}", "ezsf  _security.log" );
     return $module->handleError( eZError::KERNEL_MODULE_VIEW_NOT_FOUND, 'kernel' );
 }
 
