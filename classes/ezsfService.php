@@ -75,6 +75,20 @@ abstract class ezsfService
 
     /**
      *
+     * Variable used to redirect the user after the service execution
+     *
+     * Possible values :
+     * - null means that we redirect to the previous page (default behavior)
+     * - false means that we do nothing
+     * - a string means that we redirect to that uri
+     *
+     *
+     * @var mixed
+     */
+    protected $redirectURIAfterExecution;
+
+    /**
+     *
      * @var Buzz\Client\Curl
      */
     protected $client;
@@ -184,6 +198,7 @@ abstract class ezsfService
             // en termes de construction de la requete
             $this->populateRequest();
 
+            // sends the request
             $this->client->send( $this->request, $this->response );
 
             // déclenche les actions spécifiques à ce service / methode
@@ -375,6 +390,33 @@ abstract class ezsfService
         $cookie->setName( self::COOKIE_TOKEN_NAME );
         $cookie->setValue( $this->tokenToUse );
         $this->request->addHeader( $cookie->toCookieHeader() );
+    }
+
+    /**
+     *
+     * Set the $uri which will be used to redirect the user when the service
+     * execution is done
+     *
+     *
+     * @param mixed $uri
+     */
+    public function setRedirectURIAfterExecution( $uri )
+    {
+        // todo validation and warning if the uri can not be handle by eZ
+        $this->redirectURIAfterExecution = $uri;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRedirectURIAfterExecution()
+    {
+        return $this->redirectURIAfterExecution;
+    }
+
+    public function hasToBeRedirected()
+    {
+        return $this->getRedirectURIAfterExecution() !== false;
     }
 
     public function setRoutePrefix( $prefix )

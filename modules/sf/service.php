@@ -1,5 +1,6 @@
 <?php
 
+/* @var $module eZModule */
 $module = $Params['Module'];
 
 $serviceName = $Params['Service'];
@@ -38,5 +39,16 @@ $prefix .= "/{$serviceName}/{$methodToCall}";
 
 $service->setRoutePrefix( $prefix );
 $service->$methodToCall( $params );
+
+if( $service->hasToBeRedirected() )
+{
+    $uri = $service->getRedirectURIAfterExecution();
+    if( is_null( $uri ) )
+    {
+        $uri = $_SERVER['HTTP_REFERER'];
+    }
+
+    $module->redirectTo( $uri );
+}
 
 $Result['content'] = $service->getResponseContent();
