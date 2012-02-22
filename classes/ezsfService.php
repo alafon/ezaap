@@ -352,7 +352,8 @@ abstract class ezsfService
 
     public function getJSONResponse()
     {
-        return json_decode( $this->getResponseContent() );
+        // todo add test on the result format
+        return json_decode( $this->response->getContent() );
     }
 
     protected function addLocaleToRequest()
