@@ -1,11 +1,11 @@
 <?php
 
-class ezsfServiceDummyHandler extends ezsfService
+class ezaapServiceDummyHandler extends ezaapService
 {
     /**
      *
      * For security reason
-     * This service can not be called using /sf/service/User/Edit
+     * This service can not be called using /ezaap/service/User/Edit
      *
      * @return type
      */
@@ -35,7 +35,7 @@ class ezsfServiceDummyHandler extends ezsfService
         }
 
         $this->request->setResource($resource);
-        $this->setRoutePrefix( '/sf/service/Dummy/Dummy' );
+        $this->setRoutePrefix( '/ezaap/service/Dummy/Dummy' );
 
         // forwards POST parameters if available
         if( $_POST )

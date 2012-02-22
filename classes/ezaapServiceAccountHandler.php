@@ -4,7 +4,7 @@
  *
  * Usage :
  *
- * $service = ezsfService::get( 'Account' );
+ * $service = ezaapService::get( 'Account' );
  * $credentials = array( '_username' => 'b2c1@france.fr',
                          '_password' => 'sensio' );
  * $service->authenticate( $credentials );
@@ -13,11 +13,11 @@
  * $service->isLoggedIn();
  * $service->getUserData();
  *
- * @property ezsfServiceMethod $Authenticate
+ * @property ezaapServiceMethod $Authenticate
  *
  *
  */
-class ezsfServiceAccountHandler extends ezsfService
+class ezaapServiceAccountHandler extends ezaapService
 {
     /**
      *
@@ -38,7 +38,7 @@ class ezsfServiceAccountHandler extends ezsfService
     /**
      *
      * For security reason
-     * This service can not be called using /sf/service/Account/Authenticate
+     * This service can not be called using /ezaap/service/Account/Authenticate
      *
      * @todo being able to define this property for each service methods
      *
@@ -131,9 +131,9 @@ class ezsfServiceAccountHandler extends ezsfService
 
     protected function postBusinessSelectResponse()
     {
-        $ezsfuser = ezsfUser::instance();
-        $ezsfuser->business = $this->getJSONResponse()->business;
-        $ezsfuser->store();
+        $ezaapuser = ezaapUser::instance();
+        $ezaapuser->business = $this->getJSONResponse()->business;
+        $ezaapuser->store();
     }
 
 
@@ -151,7 +151,7 @@ class ezsfServiceAccountHandler extends ezsfService
             {
                 $businessList[$business->id] = array( 'label' => $business->name );
             }
-            $selectedBusinessID = ezsfUser::instance()->selectedBusiness();
+            $selectedBusinessID = ezaapUser::instance()->selectedBusiness();
             $selectedBusinessName = $businessList[$selectedBusinessID]['label'];
             $this->responseContent = array( 'business_list' => $businessList,
                                             'form_url' => $formURL,

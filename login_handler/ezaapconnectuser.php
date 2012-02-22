@@ -11,15 +11,15 @@
    const ROLE_ACCOUNTANT           = 3;
    const ROLE_CREATOR              = 4;
    const ROLE_TCA                  = 5;
- * 
+ *
  */
-class ezsfConnectUser extends eZUser
+class ezaapConnectUser extends eZUser
 {
     public static function loginUser( $login, $password, $authenticationMatch = false )
     {
-        $debugLabel = "Authentication using ezsfServiceAccountHandler";
-        /* @var ezsfServiceAccountHandler $authService */
-        $authService = ezsfService::get( ezsfServiceAccountHandler::SERVICE_NAME );
+        $debugLabel = "Authentication using ezaapServiceAccountHandler";
+        /* @var ezaapServiceAccountHandler $authService */
+        $authService = ezaapService::get( ezaapServiceAccountHandler::SERVICE_NAME );
         $authService->Authenticate( array( '_username' => $login,
                                            '_password' => $password ));
 
@@ -38,12 +38,12 @@ class ezsfConnectUser extends eZUser
 
     /**
      *
-     * Create a new ezsfConnectUser by trying to fetch the matching eZ Publish
+     * Create a new ezaapConnectUser by trying to fetch the matching eZ Publish
      * user using the roles returned by the backend
      *
      * @todo à améliorer avec le formalisme qui sera choisit
-     * @param ezsfUser $role
-     * @return ezsfConnectUser
+     * @param ezaapUser $role
+     * @return ezaapConnectUser
      */
     public static function createWithSFData( $sfData )
     {
@@ -66,7 +66,7 @@ class ezsfConnectUser extends eZUser
     /**
      *
      * @param type $role
-     * @return ezsfConnectUser
+     * @return ezaapConnectUser
      */
     private static function fetchByRole( $role )
     {
@@ -76,7 +76,7 @@ class ezsfConnectUser extends eZUser
 
     private static function extendSessionData( $sfData )
     {
-        eZSession::set( ezsfUser::SESSION_VARNAME, new ezsfUser( $sfData ) );
+        eZSession::set( ezaapUser::SESSION_VARNAME, new ezaapUser( $sfData ) );
     }
 }
 

@@ -1,16 +1,16 @@
 <?php
 
-$Module = array( 'name' => 'Symfony Service Router' );
+$Module = array( 'name' => 'Backend Service Router' );
 
 $ViewList = array();
 $ViewList['service'] = array(
     'script' => 'service.php',
     'params' => array( 'Service', 'Method' ),
-    'functions' => array( 'sfservice' )
+    'functions' => array( 'call' )
     );
 
 $FunctionList = array();
-$FunctionList['sfservice'] = array();
+$FunctionList['call'] = array();
 
 
 ?>

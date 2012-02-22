@@ -1,7 +1,7 @@
 <?php /*
 
 [DataTypeSettings]
-ExtensionDirectories[]=sfconnect
-AvailableDataTypes[]=ezsfuser
+ExtensionDirectories[]=ezaap
+AvailableDataTypes[]=ezaapuser
 
 */ ?>

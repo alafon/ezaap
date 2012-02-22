@@ -1,10 +1,10 @@
 <?php /*
 
 [General]
-AllowedTypes[]=ezsfUserBanner
+AllowedTypes[]=ezaapUserBanner
 
-[ezsfUserBanner]
-Name=ezsf - User Banner
+[ezaapUserBanner]
+Name=ezaap - User Banner
 ManualAddingOfItems=disabled
 
 */ ?>

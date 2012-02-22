@@ -2,21 +2,21 @@
 
 [SiteAccessSettings]
 # Only for development
-AnonymousAccessList[]=sf/service
+AnonymousAccessList[]=ezaap/service
 
 [RoleSettings]
 # Only for development
-PolicyOmitList[]=sf/service
+PolicyOmitList[]=ezaap/service
 
 [UserSettings]
-ExtensionDirectory[]=sfconnect
+ExtensionDirectory[]=ezaap
 
 LoginHandler[]
-LoginHandler[]=sfConnect
+LoginHandler[]=aapConnect
 LoginHandler[]=standard
 
 [TemplateSettings]
-ExtensionAutoloadPath[]=sfconnect
+ExtensionAutoloadPath[]=ezaap
 
 */ ?>
 

@@ -1,8 +1,8 @@
 <?php
 
 $eZTemplateOperatorArray = array();
-$eZTemplateOperatorArray[] = array( 'script' => 'extension/sfconnect/autoloads/ezsfserviceoperators.php',
-                                    'class' => 'ezsfServiceOperators',
-                                    'operator_names' => array( 'ezsfservice' ) );
+$eZTemplateOperatorArray[] = array( 'script' => 'extension/ezaap/autoloads/ezaapserviceoperators.php',
+                                    'class' => 'ezaapServiceOperators',
+                                    'operator_names' => array( 'ezaapservice' ) );
 
 ?>
