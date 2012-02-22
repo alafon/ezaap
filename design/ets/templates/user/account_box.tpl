@@ -1,13 +1,13 @@
 {def $current_user = fetch( 'user', 'current_user' )}
 {if $current_user.is_logged_in}
 
-{def $selected_business = $current_user.contentobject.data_map.ezsfuserdata.content.business
-     $business_data = ezsfservice('Account','BusinessList')
+{def $selected_business = $current_user.contentobject.data_map.ezaapuserdata.content.business
+     $business_data = ezaapservice('Account','BusinessList')
      $business_list = $business_data.business_list
      $default_role_label = "My self"|i18n('account/box')}
 
     <form method="post" action={$business_data.form_url|ezurl}>
-        <p>{"Hello %username"|i18n('account/box',,hash('%username', $current_user.contentobject.data_map.ezsfuserdata.content.username|wash))}</p>
+        <p>{"Hello %username"|i18n('account/box',,hash('%username', $current_user.contentobject.data_map.ezaapuserdata.content.username|wash))}</p>
         {if $business_data.business_list|count}
             {if $business_data.selected_business}
             <p>{"Logged in as %selected_role"|i18n('account/box',,hash('%selected_role', concat( '<b>', $business_data.selected_business_name, '</b>' )))}</p>

@@ -1,10 +1,10 @@
 <?php
 
-class ezsfServiceUserHandler extends ezsfService
+class ezaapServiceUserHandler extends ezaapService
 {
     /**
      *
-     * Available in module mode using /sf/service/User/xxx
+     * Available in module mode using /ezaap/service/User/xxx
      *
      * @return type
      */
@@ -24,7 +24,7 @@ class ezsfServiceUserHandler extends ezsfService
 
     public function preBannerRequest()
     {
-        $this->setRoutePrefix( '/sf/service/User/Banner' );
+        $this->setRoutePrefix( '/ezaap/service/User/Banner' );
         $this->addTokenToRequest();
     }
     public function preBannerResponse()

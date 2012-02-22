@@ -5,12 +5,12 @@
  * invoke from your templates or your eZ Publish scripts
  *
  */
-abstract class ezsfService
+abstract class ezaapService
 {
     const COOKIE_TOKEN_NAME = '_token';
     const ROUTE_PREFIX_GET_PARAMETER = 'route_prefix';
     const DEFAULT_TIMEOUT = 10;
-    const LOG_FILE = "ezsf";
+    const LOG_FILE = "ezaap";
 
     /**
      *
@@ -100,7 +100,7 @@ abstract class ezsfService
 
     /**
      *
-     * @var ezsfServiceConfiguration
+     * @var ezaapServiceConfiguration
      */
     protected $configuration;
 
@@ -112,11 +112,11 @@ abstract class ezsfService
     public function __construct( $serviceName, $useCurrentUserToken = false )
     {
         $this->serviceName = $serviceName;
-        $this->configuration = new ezsfServiceConfiguration( $this );
+        $this->configuration = new ezaapServiceConfiguration( $this );
 
         if( $useCurrentUserToken )
         {
-            $this->tokenToUse = ezsfUser::getFromSessionObject()->token;
+            $this->tokenToUse = ezaapUser::getFromSessionObject()->token;
         }
 
         $this->client = new Buzz\Client\Curl();
@@ -130,7 +130,7 @@ abstract class ezsfService
 
     /**
      * A reimpl pour indiquer si le service symfony peut etre appelé par le
-     * proxy eZ Publish /sf/service/<servicename>/<method>
+     * proxy eZ Publish /ezaap/service/<servicename>/<method>
      *
      * Doit retourner un booleen
      */
@@ -226,7 +226,7 @@ abstract class ezsfService
 
     protected function getCurrentURI()
     {
-        return "/sf/service/" . $this->serviceName . "/" . $this->currentMethod;
+        return "/ezaap/service/" . $this->serviceName . "/" . $this->currentMethod;
     }
 
     private function populateRequest()
@@ -259,7 +259,7 @@ abstract class ezsfService
         $this->addLocaleToRequest();
 
         // Add cookies stored in the User Session
-        $userCookies = ezsfUser::instance()->cookies;
+        $userCookies = ezaapUser::instance()->cookies;
         if( !empty ( $userCookies ))
         {
             $cookiesHeader = array();
@@ -309,7 +309,7 @@ abstract class ezsfService
         {
             $cookie = new \Buzz\Cookie\Cookie();
             $cookie->fromSetCookieHeader($this->response->getHeader( 'Set-Cookie' ) );
-            ezsfUser::instance()->setCookie( $cookie->getName(), $cookie->getValue() );
+            ezaapUser::instance()->setCookie( $cookie->getName(), $cookie->getValue() );
         }
 
         // 'post' response trigger
@@ -335,7 +335,7 @@ abstract class ezsfService
      *
      * @param string $serviceName
      * @param boolean $useCurrentToken
-     * @return ezsfService
+     * @return ezaapService
      */
     public static function get( $serviceName, $useCurrentToken = false )
     {
@@ -353,7 +353,7 @@ abstract class ezsfService
      * Returns tthe service handler for the given $serviceName
      *
      * @param string $serviceName
-     * @return sfService
+     * @return ezaapService
      */
     private static function loadService( $serviceName, $useCurrentToken = false )
     {
@@ -362,7 +362,7 @@ abstract class ezsfService
 
         // get the handler using ezp api
         $iniBlockName = "{$serviceName}Settings";
-        $optionArray = array( 'iniFile'      => ezsfServiceConfiguration::CONFIG_FILE,
+        $optionArray = array( 'iniFile'      => ezaapServiceConfiguration::CONFIG_FILE,
                               'iniSection'   => $iniBlockName,
                               'iniVariable'  => 'Handler',
                               'handlerParams'=> $handlerParams );
@@ -395,7 +395,7 @@ abstract class ezsfService
             // try to use a token already set
             if( !$this->tokenToUse )
             {
-                $this->tokenToUse = ezsfUser::getFromSessionObject()->token;
+                $this->tokenToUse = ezaapUser::getFromSessionObject()->token;
             }
         }
         $cookie = new \Buzz\Cookie\Cookie();

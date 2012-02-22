@@ -3,9 +3,9 @@
 /**
  * Structure contenant un objet inspectable depuis les templates
  */
-class ezsfUser
+class ezaapUser
 {
-    const SESSION_VARNAME = 'ezsfUserData';
+    const SESSION_VARNAME = 'ezaapUserData';
 
     public $id;
     public $username;
@@ -17,11 +17,11 @@ class ezsfUser
 
     public $cookies = array();
 
-    function __construct( $ezsfData = false )
+    function __construct( $ezaapData = false )
     {
-        if( $ezsfData !== false )
+        if( $ezaapData !== false )
         {
-            foreach( get_object_vars( $ezsfData ) as $attribute => $value )
+            foreach( get_object_vars( $ezaapData ) as $attribute => $value )
             {
                 $this->$attribute = $value;
             }
@@ -31,7 +31,7 @@ class ezsfUser
 
     /**
      *
-     * @return ezsfUser
+     * @return ezaappUser
      */
     static function getFromSessionObject()
     {
@@ -49,7 +49,7 @@ class ezsfUser
 
     /**
      *
-     * @return ezsfUser
+     * @return ezaapUser
      */
     static public function instance()
     {

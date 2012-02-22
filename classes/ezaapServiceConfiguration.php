@@ -11,12 +11,12 @@
  * @property string $AlwaysAddToken
  *
  */
-class ezsfServiceConfiguration
+class ezaapServiceConfiguration
 {
     /**
      * The configuration filename where the services are defined
      */
-    const CONFIG_FILE = 'ezsfservice.ini';
+    const CONFIG_FILE = 'ezaapservice.ini';
 
     /**
      *
@@ -44,9 +44,9 @@ class ezsfServiceConfiguration
      *
      * Constructor
      *
-     * @param ezsfService $service The service concerned by this configuration handler
+     * @param ezaapService $service The service concerned by this configuration handler
      */
-    public function __construct( ezsfService $service )
+    public function __construct( ezaapService $service )
     {
         $this->serviceName = $service->getServiceName();
         $this->loadIniFile();

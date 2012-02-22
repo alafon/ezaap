@@ -1,22 +1,22 @@
 <?php
 
-class ezsfUserType extends eZDataType
+class ezaapUserType extends eZDataType
 {
-    const DATA_TYPE_STRING = "ezsfuser";
+    const DATA_TYPE_STRING = "ezaapuser";
 
     function __construct()
     {
-        $this->eZDataType( self::DATA_TYPE_STRING, ezpI18n::tr( 'kernel/classes/datatypes', "ezsfUser", 'Datatype name' ),
+        $this->eZDataType( self::DATA_TYPE_STRING, ezpI18n::tr( 'kernel/classes/datatypes', "ezaapUser", 'Datatype name' ),
                            array( 'serialize_supported' => true ) );
     }
 
     function objectAttributeContent( $contentObjectAttribute )
     {
         // retourne un object inspectable dans les templates
-        return ezsfUser::getFromSessionObject();
+        return ezaapUser::getFromSessionObject();
     }
 }
 
-eZDataType::register( ezsfUserType::DATA_TYPE_STRING, "ezsfusertype" );
+eZDataType::register( ezaapUserType::DATA_TYPE_STRING, "ezaapusertype" );
 
 ?>

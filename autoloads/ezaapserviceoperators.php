@@ -1,6 +1,6 @@
 <?php
 
-class ezsfServiceOperators
+class ezaapServiceOperators
 {
     /**
      * Constructor
@@ -17,7 +17,7 @@ class ezsfServiceOperators
      */
     public function operatorList()
     {
-        return array( 'ezsfservice' );
+        return array( 'ezaapservice' );
     }
 
     /**
@@ -40,7 +40,7 @@ class ezsfServiceOperators
      */
     public function namedParameterList()
     {
-        return array( 'ezsfservice' => array( 'service_name' => array( 'type' => 'string',
+        return array( 'ezaapservice' => array( 'service_name' => array( 'type' => 'string',
                                                                        'required' => true,
                                                                        'default' => '' ),
                                               'service_method' => array( 'type' => 'integer',
@@ -59,11 +59,11 @@ class ezsfServiceOperators
     {
         switch ( $operatorName )
         {
-            case 'ezsfservice':
+            case 'ezaapservice':
             {
                 $method = $namedParameters['service_method'];
                 $useCurrentToken = $namedParameters['use_current_token'];
-                $service = ezsfService::get( $namedParameters['service_name'], $useCurrentToken );
+                $service = ezaapService::get( $namedParameters['service_name'], $useCurrentToken );
                 $service->$method( $namedParameters['service_parameters'] );
                 $htmlResponse = $service->getResponseContent();
                 $operatorValue = $htmlResponse;
