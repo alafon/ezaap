@@ -28,7 +28,7 @@ if( is_null( $methodToCall ) )
 $params = array( 'sf_uri' => $sfURI,
                  'get_parameters' => $_GET,
                  'post_request' => $_SERVER['REQUEST_METHOD'] == Buzz\Message\Request::METHOD_POST,
-                 'referer' => $_SERVER['HTTP_REFERER']);
+                 'referer' => (array_key_exists( 'HTTP_REFERER', $_SERVER )) ? $_SERVER['HTTP_REFERER'] : null );
 
 if($params['post_request'])
 {
