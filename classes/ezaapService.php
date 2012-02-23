@@ -366,6 +366,11 @@ abstract class ezaapService
      */
     private static function loadService( $serviceName, $useCurrentToken = false )
     {
+        if( array_search( $serviceName, eZINI::instance( ezaapServiceConfiguration::CONFIG_FILE )->variable('GeneralSettings', 'AvailableServices') ) === false )
+        {
+            eZDebug::writeDebug( "Unknown service $serviceName", __CLASS__ . ":" . __FUNCTION__ );
+            return null;
+        }
         // for futur usage
         $handlerParams = array( $serviceName, $useCurrentToken );
 

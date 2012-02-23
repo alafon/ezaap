@@ -14,6 +14,12 @@ $otherParameters = array_slice( $module->ViewParameters, count($namedParameters)
 $sfURI = '/' . implode( '/', $otherParameters );
 
 $service = ezaapService::get( $serviceName );
+if( is_null( $service ) )
+{
+    eZLog::write( "Tentative d'accès au service $serviceName par {$_SERVER["REMOTE_ADDR"]}", "ezaap  _security.log" );
+    return $module->handleError( eZError::KERNEL_MODULE_VIEW_NOT_FOUND, 'kernel' );
+}
+
 if( !$service->availableThroughServiceModule() )
 {
     // à améliorer
