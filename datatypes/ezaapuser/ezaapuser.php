@@ -26,7 +26,8 @@ class ezaapUser
                 $this->$attribute = $value;
             }
         }
-        $this->setCookie( '_token', $this->token );
+        if( $this->token )
+            $this->setCookie( '_token', $this->token );
     }
 
     /**

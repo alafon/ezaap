@@ -78,8 +78,16 @@ class ezaapServiceAccountHandler extends ezaapService
         $this->client->setMaxRedirects(0);
         $this->client->send($this->request, $this->response);
 
+        // retrieve Set-Cookie
+        $cookieReturned = new Buzz\Cookie\Cookie();
+        $cookieReturned->fromSetCookieHeader( $this->response->getHeader('Set-Cookie') );
+
         // requete d'authentification
         $this->request = new Buzz\Message\FormRequest();
+
+        // re-add the token previously return by the first request
+        //$this->request->addHeader($this->getCookieToken()->toCookieHeader());
+        $this->setTokenToUse( $cookieReturned->getValue() );
 
         // re-set host and resource
         $this->request->setResource( $resource );
@@ -88,8 +96,6 @@ class ezaapServiceAccountHandler extends ezaapService
         $this->request->setField( '_username', $username );
         $this->request->setField( '_password', $password );
         $this->request->setField( '_target_path', self::REDIRECT_AFTER_LOGIN_CHECK );
-        //$this->request->addHeader($this->getCookieToken()->toCookieHeader());
-        $this->setTokenToUse( $this->getToken() );
 
         $this->response = new Buzz\Message\Response();
     }
@@ -108,16 +114,20 @@ class ezaapServiceAccountHandler extends ezaapService
             // means that we are logged
             if (preg_match('/'.preg_quote( self::REDIRECT_AFTER_LOGIN_CHECK , '/').'$/', $this->response->getHeader('location')))
             {
-                // usefull
                 $this->logged = true;
 
-                $token = $this->getCookieToken();
+                // previous request token
+                $cookieToken = new Buzz\Cookie\Cookie();
+                $cookieToken->setName('_token');
+                $cookieToken->setValue( $this->getTokenToUse() );
 
+                // now we can follow the redirection
                 $this->request = new Buzz\Message\Request( Buzz\Message\Request::METHOD_GET );
                 $this->request->fromUrl($this->response->getHeader('location'));
-                $this->request->addHeader($token->toCookieHeader());
+                $this->request->addHeader($cookieToken->toCookieHeader());
 
                 $this->response = new Buzz\Message\Response();
+
                 $this->client->send($this->request, $this->response);
             }
         }

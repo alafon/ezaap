@@ -13,21 +13,17 @@ class ezaapServiceUserHandler extends ezaapService
         return true;
     }
 
-    public function preEditRequest()
-    {
-        $this->addTokenToRequest();
-    }
     public function preEditResponse()
     {
         $this->responseContent = $this->response->getContent();
     }
 
-    public function preBannerRequest()
-    {
-        $this->setRoutePrefix( '/ezaap/service/User/Banner' );
-        $this->addTokenToRequest();
-    }
     public function preBannerResponse()
+    {
+        $this->responseContent = $this->response->getContent();
+    }
+
+    public function postStorePublicSessionResponse()
     {
         $this->responseContent = $this->response->getContent();
     }

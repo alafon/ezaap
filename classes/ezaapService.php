@@ -118,7 +118,7 @@ abstract class ezaapService
 
         if( $useCurrentUserToken )
         {
-            $this->tokenToUse = ezaapUser::getFromSessionObject()->token;
+            $this->setTokenToUse( ezaapUser::getFromSessionObject()->token );
         }
 
         $this->client = new Buzz\Client\Curl();
@@ -250,30 +250,38 @@ abstract class ezaapService
         // traitements génériques effectués sur toutes les requetes
         // ajoute le prefix si $this->routePrefix n'est pas null
         $this->addRoutePrefixToRequest();
-        // ajout le token si fixé
-        if( $this->tokenToUse )
-        {
-            $this->addTokenToRequest( $this->tokenToUse );
-        }
-        // ajoute le token en se basant sur la config si possible
-        elseif( $this->configuration->AlwaysAddToken == 'true' )
-        {
-            $this->addTokenToRequest();
-        }
+        // Add the locale to the request
         $this->addLocaleToRequest();
+
+        // Always add token depending on configuration
+        if( $this->configuration->AlwaysAddToken == 'true' && !$this->tokenToUse )
+        {
+            $this->setTokenToUse( ezaapUser::instance()->token );
+        }
 
         // Add cookies stored in the User Session
         $userCookies = ezaapUser::instance()->cookies;
         if( !empty ( $userCookies ))
         {
             $cookiesHeader = array();
+            eZDebug::writeDebug($userCookies);
             foreach( $userCookies as $name => $value )
             {
-                $cookiesHeader[] = "$name=$value";
+                $cookiesHeader[$name] = "$name=$value";
             }
+            eZDebug::writeDebug($this->request->getHeader('Cookie'));
             $cookieString = "Cookie: " . implode( "; ", $cookiesHeader );
             $this->request->addHeader( $cookieString );
+            eZDebug::writeDebug($this->request->getHeader('Cookie'));
         }
+
+        // Add the token cookie to the headers if $this->tokenToUse not null
+        // AND if not already set because of a session cookie
+        if( !array_key_exists( '_token' , $userCookies ) )
+        {
+            $this->addTokenToRequest();
+        }
+
 
         // post 'request' trigger
         if( method_exists( $this, $postMethodName ) )
@@ -397,20 +405,20 @@ abstract class ezaapService
         $this->tokenToUse = $token;
     }
 
-    protected function addTokenToRequest( $token = false )
+    protected function getTokenToUse()
     {
-        if( $token === false )
+        return $this->tokenToUse;
+    }
+
+    private function addTokenToRequest()
+    {
+        if( !is_null( $this->tokenToUse ))
         {
-            // try to use a token already set
-            if( !$this->tokenToUse )
-            {
-                $this->tokenToUse = ezaapUser::getFromSessionObject()->token;
-            }
+            $cookie = new \Buzz\Cookie\Cookie();
+            $cookie->setName( self::COOKIE_TOKEN_NAME );
+            $cookie->setValue( $this->tokenToUse );
+            $this->request->addHeader( $cookie->toCookieHeader() );
         }
-        $cookie = new \Buzz\Cookie\Cookie();
-        $cookie->setName( self::COOKIE_TOKEN_NAME );
-        $cookie->setValue( $this->tokenToUse );
-        $this->request->addHeader( $cookie->toCookieHeader() );
     }
 
     /**
