@@ -264,15 +264,12 @@ abstract class ezaapService
         if( !empty ( $userCookies ))
         {
             $cookiesHeader = array();
-            eZDebug::writeDebug($userCookies);
             foreach( $userCookies as $name => $value )
             {
                 $cookiesHeader[$name] = "$name=$value";
             }
-            eZDebug::writeDebug($this->request->getHeader('Cookie'));
             $cookieString = "Cookie: " . implode( "; ", $cookiesHeader );
             $this->request->addHeader( $cookieString );
-            eZDebug::writeDebug($this->request->getHeader('Cookie'));
         }
 
         // Add the token cookie to the headers if $this->tokenToUse not null
