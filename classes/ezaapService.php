@@ -1,8 +1,8 @@
 <?php
 
 /**
- * This class is meant to be extended to define each service you want to
- * invoke from your templates or your eZ Publish scripts
+ * This class is meant to be extended in order to define each service you want
+ * to invoke from eZ Publish
  *
  */
 abstract class ezaapService
@@ -60,7 +60,7 @@ abstract class ezaapService
      *
      * @var string
      */
-    private $tokenToUse = null;
+    private $tokenToUse;
 
     /**
      *
@@ -201,15 +201,15 @@ abstract class ezaapService
             $this->populateRequest();
 
             // sends the request
-            eZDebug::accumulatorStart( 'request_sending', __CLASS__, 'Request made to the backend' );
             eZDebug::writeDebug( $this->request, __CLASS__ . ":{$this->currentMethod}:Request:prepared" );
+            eZDebug::accumulatorStart( 'request_sending', __CLASS__, 'Request made to the backend' );
             $this->client->send( $this->request, $this->response );
-            eZDebug::writeDebug( $this->request, __CLASS__ . ":{$this->currentMethod}:Response:raw" );
             eZDebug::accumulatorStop( 'request_sending' );
+            eZDebug::writeDebug( $this->response, __CLASS__ . ":{$this->currentMethod}:Response:raw" );
 
             // triggers response related stuff, implemented at handler level
             $this->handleResponse();
-            eZDebug::writeDebug( $this->request, __CLASS__ . ":{$this->currentMethod}:Response:handled" );
+            eZDebug::writeDebug( $this->response, __CLASS__ . ":{$this->currentMethod}:Response:handled" );
             $this->log();
         }
         catch( Exception $e )
@@ -496,8 +496,10 @@ abstract class ezaapService
     private function log()
     {
         $logFile = self::LOG_FILE . "_{$this->serviceName}.log";
-        $message =  "\nREQ - Resource: {$this->request->getResource()} Method: {$this->request->getMethod()}";
+        $message =  "\nREQ - {$this->serviceName}\t{$this->currentMethod}";
+        $message .= "\nREQ - {$this->request->getMethod()} {$this->request->getResource()}";
         $message .= "\nREQ - Token: " . $this->tokenToUse;
+        $message .= "\nREQ - User: " . ezaapUser::instance()->username;
         $message .= "\nRES - ContentLength: " . strlen($this->response->getContent()) . " Status Code: {$this->response->getStatusCode()}";
         eZLog::write( $message, $logFile );
     }

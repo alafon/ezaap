@@ -25,8 +25,8 @@ class ezaapConnectUser extends eZUser
 
         if( $authService->isLoggedIn() )
         {
-            eZDebug::writeDebug( "User $login logged in. Token: " . $authService->getToken(), $debugLabel );
             $sfUser = self::createWithSFData( $authService->getUserData() );
+            eZDebug::writeDebug( "User $login logged in. Token: " . $sfUser->token, $debugLabel );
             return $sfUser;
         }
         else
