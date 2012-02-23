@@ -157,7 +157,7 @@ class ezaapServiceAccountHandler extends ezaapService
         if( $this->request->getMethod() == Buzz\Message\Request::METHOD_GET )
         {
             $businessList = array();
-            $businessList[0]['label'] = ezpI18n::tr( 'account/box', "My self" );
+            $businessList[0]['label'] = ezpI18n::tr( 'account/box', "-" );
             // Replace BusinessList by BusinessSelect
             $formURL = str_replace( $this->currentMethod, 'BusinessSelect', $this->getCurrentURI() );
             foreach( $this->getJSONResponse() as $business )
