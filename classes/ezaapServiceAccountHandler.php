@@ -14,6 +14,8 @@
  * $service->getUserData();
  *
  * @property ezaapServiceMethod $Authenticate
+ * @property ezaapServiceMethod $BusinessSelect
+ * @property ezaapServiceMethod $BusinessList
  *
  *
  */
@@ -86,7 +88,8 @@ class ezaapServiceAccountHandler extends ezaapService
         $this->request->setField( '_username', $username );
         $this->request->setField( '_password', $password );
         $this->request->setField( '_target_path', self::REDIRECT_AFTER_LOGIN_CHECK );
-        $this->request->addHeader($this->getCookieToken()->toCookieHeader());
+        //$this->request->addHeader($this->getCookieToken()->toCookieHeader());
+        $this->setTokenToUse( $this->getToken() );
 
         $this->response = new Buzz\Message\Response();
     }
@@ -125,8 +128,8 @@ class ezaapServiceAccountHandler extends ezaapService
         if( $this->requestArguments['post_request'] )
         {
             $this->request->addFields( $_POST );
-
         }
+        $this->setRedirectURIAfterExecution( $this->requestArguments['referer'] );
     }
 
     protected function postBusinessSelectResponse()

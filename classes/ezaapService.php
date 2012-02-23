@@ -60,7 +60,7 @@ abstract class ezaapService
      *
      * @var string
      */
-    protected $tokenToUse = null;
+    private $tokenToUse = null;
 
     /**
      *
@@ -68,7 +68,7 @@ abstract class ezaapService
      *
      * @var string
      */
-    protected $routePrefix;
+    private $routePrefix;
 
     /**
      *
@@ -82,7 +82,7 @@ abstract class ezaapService
      *
      * @var mixed
      */
-    protected $redirectURIAfterExecution;
+    private $redirectURIAfterExecution;
 
     /**
      *
@@ -103,6 +103,8 @@ abstract class ezaapService
      * @var ezaapServiceConfiguration
      */
     protected $configuration;
+
+    private $referer;
 
     /**
      *
@@ -388,6 +390,11 @@ abstract class ezaapService
         $this->request->addHeader( "eZ-Locale: " . substr( eZLocale::currentLocaleCode(), 0, 2 ) );
     }
 
+    protected function setTokenToUse( $token )
+    {
+        $this->tokenToUse = $token;
+    }
+
     protected function addTokenToRequest( $token = false )
     {
         if( $token === false )
@@ -428,7 +435,7 @@ abstract class ezaapService
 
     public function hasToBeRedirected()
     {
-        return $this->getRedirectURIAfterExecution() !== false;
+        return !is_null( $this->redirectURIAfterExecution );
     }
 
     public function setRoutePrefix( $prefix )
@@ -464,8 +471,9 @@ abstract class ezaapService
 
     /**
      *
-     * Transforms a Buzz\Message\Request into a Buzz\Message\FormRequest
-     * and keeps host, resource and headers set in the Request
+     * Convenience method to transforms a Buzz\Message\Request into a
+     * Buzz\Message\FormRequest and keeps host, resource and headers set in the
+     * Request
      *
      * @param \Buzz\Message\Request $request
      */
@@ -483,7 +491,7 @@ abstract class ezaapService
      * Logs information about the request and the response
      *
      */
-    protected function log()
+    private function log()
     {
         $logFile = self::LOG_FILE . "_{$this->serviceName}.log";
         $message =  "\nREQ - Resource: {$this->request->getResource()} Method: {$this->request->getMethod()}";

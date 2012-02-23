@@ -27,7 +27,8 @@ if( is_null( $methodToCall ) )
 
 $params = array( 'sf_uri' => $sfURI,
                  'get_parameters' => $_GET,
-                 'post_request' => $_SERVER['REQUEST_METHOD'] == Buzz\Message\Request::METHOD_POST );
+                 'post_request' => $_SERVER['REQUEST_METHOD'] == Buzz\Message\Request::METHOD_POST,
+                 'referer' => $_SERVER['HTTP_REFERER']);
 
 if($params['post_request'])
 {
@@ -43,11 +44,6 @@ $service->$methodToCall( $params );
 if( $service->hasToBeRedirected() )
 {
     $uri = $service->getRedirectURIAfterExecution();
-    if( is_null( $uri ) )
-    {
-        $uri = $_SERVER['HTTP_REFERER'];
-    }
-
     $module->redirectTo( $uri );
 }
 
