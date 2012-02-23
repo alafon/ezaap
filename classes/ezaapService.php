@@ -196,18 +196,20 @@ abstract class ezaapService
             $this->request->setHost( $server );
             $this->request->setResource( $uri );
 
-            // déclenche les actions spécifiques à ce service / methode
-            // en termes de construction de la requete
+            // triggers request related stuff, implemented at handler level
+            eZDebug::writeDebug( $this->request, __CLASS__ . ":{$this->currentMethod}:Request:raw" );
             $this->populateRequest();
 
             // sends the request
             eZDebug::accumulatorStart( 'request_sending', __CLASS__, 'Request made to the backend' );
+            eZDebug::writeDebug( $this->request, __CLASS__ . ":{$this->currentMethod}:Request:prepared" );
             $this->client->send( $this->request, $this->response );
+            eZDebug::writeDebug( $this->request, __CLASS__ . ":{$this->currentMethod}:Response:raw" );
             eZDebug::accumulatorStop( 'request_sending' );
 
-            // déclenche les actions spécifiques à ce service / methode
-            // en termes de gestion de la réponse
+            // triggers response related stuff, implemented at handler level
             $this->handleResponse();
+            eZDebug::writeDebug( $this->request, __CLASS__ . ":{$this->currentMethod}:Response:handled" );
             $this->log();
         }
         catch( Exception $e )
