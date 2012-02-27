@@ -48,7 +48,7 @@ class ezaapServiceAccountHandler extends ezaapService
      */
     public function availableThroughServiceModule()
     {
-        return true;
+        return false;
     }
 
     /**
