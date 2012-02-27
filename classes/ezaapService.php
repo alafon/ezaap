@@ -248,6 +248,8 @@ abstract class ezaapService
         }
 
         // traitements génériques effectués sur toutes les requetes
+        // add specific client header telling the backend that we are eZ Publish
+        $this->addUserAgentToRequest();
         // ajoute le prefix si $this->routePrefix n'est pas null
         $this->addRoutePrefixToRequest();
         // Add the locale to the request
@@ -410,6 +412,14 @@ abstract class ezaapService
     protected function getTokenToUse()
     {
         return $this->tokenToUse;
+    }
+
+    /**
+     * Add a header so that the backend can handle the request differently
+     */
+    protected function addUserAgentToRequest()
+    {
+        $this->request->addHeader( "User-Agent: eZPublish/eZaaP" );
     }
 
     private function addTokenToRequest()
