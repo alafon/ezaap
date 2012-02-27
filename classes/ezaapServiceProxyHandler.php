@@ -1,12 +1,8 @@
 <?php
 
-class ezaapServiceDummyHandler extends ezaapService
+class ezaapServiceProxyHandler extends ezaapService
 {
     /**
-     *
-     * For security reason
-     * This service can not be called using /ezaap/service/User/Edit
-     *
      * @return type
      */
     public function availableThroughServiceModule()
@@ -17,11 +13,11 @@ class ezaapServiceDummyHandler extends ezaapService
     /**
      * Pre trigger used to forward everything to the backend
      *
-     * Adds the token to the request if [DummySettings].AlwaysAddToken=true
+     * Adds the token to the request if [ProxySettings].AlwaysAddToken=true
      */
-    public function preDummyRequest()
+    public function preFwdRequest()
     {
-        // forwards SF URI and GET parameters being forwarded by the /sf/service
+        // forwards SF URI and GET parameters being forwarded by the /ezaap/service
         // ezpublish module
         $resource = $this->requestArguments['sf_uri'];
         $getString = "";
@@ -35,7 +31,7 @@ class ezaapServiceDummyHandler extends ezaapService
         }
 
         $this->request->setResource($resource);
-        $this->setRoutePrefix( '/ezaap/service/Dummy/Dummy' );
+        $this->setRoutePrefix( '/ezaap/service/Proxy/Fwd' );
 
         // forwards POST parameters if available
         if( $_POST )
@@ -45,7 +41,7 @@ class ezaapServiceDummyHandler extends ezaapService
         }
     }
 
-    public function postDummyResponse()
+    public function postFwdResponse()
     {
         $this->responseContent = $this->response->getContent();
     }

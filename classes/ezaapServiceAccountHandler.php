@@ -146,7 +146,21 @@ class ezaapServiceAccountHandler extends ezaapService
     {
         $ezaapuser = ezaapUser::instance();
         $ezaapuser->business = $this->getJSONResponse()->business;
+        $ezaapuser->roles = $this->getJSONResponse()->roles;
         $ezaapuser->store();
+
+        // clone the current user based on Symfony data
+        $newUser = ezaapConnectUser::createWithSFData( $this->getJSONResponse() );
+        if( $newUser instanceof eZUser )
+        {
+            // log a new user in eZ Publish
+            $newUser->loginCurrent();
+        }
+        else
+        {
+            // @todo handle such error
+            eZLog::write( "Cannot login user in eZ Publish with roles " . implode( "-", $this->getJSONResponse()->roles ), "ezaap_security.log" );
+        }
     }
 
 
