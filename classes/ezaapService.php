@@ -474,7 +474,7 @@ abstract class ezaapService
         if( !is_null($this->routePrefix) )
         {
             $this->addGetParameter( self::ROUTE_PREFIX_GET_PARAMETER, $this->routePrefix );
-            $this->request->addHeader( "eZ-Route-Prexix: {$this->routePrefix}" );
+            $this->request->addHeader( "eZ-Route-Prefix: {$this->routePrefix}" );
         }
     }
 
