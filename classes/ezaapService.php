@@ -228,6 +228,19 @@ abstract class ezaapService
         }
     }
 
+    /**
+     *
+     * Convenience method to know if debug is enabled or not
+     *
+     * Currently calls eZDebug::isDebugEnabled();
+     *
+     * @return bool
+     */
+    private function isDebugEnabled()
+    {
+        return eZDebug::isDebugEnabled();
+    }
+
     protected function getCurrentURI()
     {
         return "/ezaap/service/" . $this->serviceName . "/" . $this->currentMethod;
@@ -305,13 +318,12 @@ abstract class ezaapService
         }
 
         // traitements génériques
-        if( $this->response->getStatusCode() == 500 )
+
+        // if not 200 or 302 and debug enabled => returns response to eZ Publish
+        $acceptableResponseCode = array( 200, 302 );
+        if( !in_array( $this->getResponseCode(), $acceptableResponseCode) && $this->isDebugEnabled() )
         {
-            $this->responseContent = "Erreur 500 sur le backend";
-        }
-        elseif( $this->response->getStatusCode() == 404 )
-        {
-            $this->responseContent = "404 not found sur " . $this->request->getUrl();
+            $this->responseContent = $this->getResponseContent();
         }
 
         // deal with response containing set-cookie header
