@@ -4,6 +4,9 @@
 # Only for development
 AnonymousAccessList[]=ezaap/service
 
+[RegionalSettings]
+TranslationExtensions[]=ezaap
+
 [RoleSettings]
 # Only for development
 PolicyOmitList[]=ezaap/service
