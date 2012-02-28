@@ -39,10 +39,21 @@ class ezaapServiceProxyHandler extends ezaapService
             self::transformToFormRequest( $this->request );
             $this->request->addFields( $_POST );
         }
+
+        // prevents Buzz from handling the redirect on his own
+        $this->client->setMaxRedirects(0);
     }
 
     public function postFwdResponse()
     {
-        $this->responseContent = $this->response->getContent();
+        // if redirect received from the backend, forwards the redirect
+        if( $this->getResponseCode() == 302 )
+        {
+            $this->setRedirectURIAfterExecution( $this->response->getHeader( 'location' ) );
+        }
+        else
+        {
+            $this->responseContent = $this->response->getContent();
+        }
     }
 }
