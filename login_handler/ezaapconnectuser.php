@@ -4,6 +4,8 @@
  * Login handler used to connect a user
  *
  * Note : defined roles in the middleoffice
+ * Note2 : this is an example of a login handler able to call a login service
+ *         provided by a backend
  *
    const ROLE_ADMIN                = 0;
    const ROLE_PURCHASER            = 1;
